@@ -1,0 +1,514 @@
+TimeSinceStart,TrialNo,TrialID,ParticipantID,FurnitureCondition,AlignmentCondition,Info,CardSeen,CardAnswered,CardPosition.x,CardPosition.y,CardPosition.z
+387.92,1,Training,15,HasFurniture,Irregular,Prepare Phase,,,,,
+486.64,1,Training,15,HasFurniture,Irregular,Learning Phase,,,,,
+495.68,1,Training,15,HasFurniture,Irregular,Card,12,,0.4577765,-0.3055379,0.5579494
+499.98,1,Training,15,HasFurniture,Irregular,Card,33,,-1.604182,-0.1555378,1.473552
+502.66,1,Training,15,HasFurniture,Irregular,Card,10,,-0.721137,-0.4555379,1.299679
+508.8,1,Training,15,HasFurniture,Irregular,Card,29,,-2.723395,0.09446216,-1.363676
+515.1,1,Training,15,HasFurniture,Irregular,Card,6,,-2.833452,-0.6555379,-0.6285658
+516.2,1,Training,15,HasFurniture,Irregular,Distractor,,,,,
+516.2,1,Training,15,HasFurniture,Irregular,Distractor Number: 6,,,,,
+525.54,1,Training,15,HasFurniture,Irregular,Distractor Number: 8,,,,,
+527.62,1,Training,15,HasFurniture,Irregular,Distractor Number: 1,,,,,
+530.16,1,Training,15,HasFurniture,Irregular,Distractor Number: 6,,,,,
+535.18,1,Training,15,HasFurniture,Irregular,Distractor Number: 2,,,,,
+539.04,1,Training,15,HasFurniture,Irregular,Distractor Number: 7,,,,,
+543.5,1,Training,15,HasFurniture,Irregular,Distractor Number: 2,,,,,
+545.6,1,Training,15,HasFurniture,Irregular,Distractor Number: 2,,,,,
+547.64,1,Training,15,HasFurniture,Irregular,Recall Phase,,,,,
+562.56,1,Training,15,HasFurniture,Irregular,Card,,26,0.0308454,-0.1416185,-1.648901
+571.12,1,Training,15,HasFurniture,Irregular,Card,,21,-1.558051,-0.4416184,1.494013
+576.18,1,Training,15,HasFurniture,Irregular,Card,,30,-2.812979,-0.04161859,-0.5928882
+583,1,Training,15,HasFurniture,Irregular,Card,,29,-2.711936,0.1083815,-1.329292
+594.48,1,Training,15,HasFurniture,Irregular,Card,,23,-0.1252362,-0.1403697,1.180185
+601.96,1,Training,15,HasFurniture,Irregular,Result,,,,,
+606.14,2,1,15,HasFurniture,Irregular,Prepare Phase,,,,,
+667.86,2,1,15,HasFurniture,Irregular,Learning Phase,,,,,
+669,2,1,15,HasFurniture,Irregular,Card,14,,0.03950369,-0.4403696,-1.652722
+674.02,2,1,15,HasFurniture,Irregular,Card,35,,-0.1252362,0.1596303,1.180185
+676.94,2,1,15,HasFurniture,Irregular,Card,21,,-1.597912,-0.4403696,1.465189
+680.28,2,1,15,HasFurniture,Irregular,Card,4,,-2.21701,-0.6403697,-1.470661
+688.82,2,1,15,HasFurniture,Irregular,Card,7,,-2.630342,-0.6403697,0.3408734
+689.8,2,1,15,HasFurniture,Irregular,Distractor,,,,,
+689.8,2,1,15,HasFurniture,Irregular,Distractor Number: 2,,,,,
+694.88,2,1,15,HasFurniture,Irregular,Distractor Number: 1,,,,,
+697.42,2,1,15,HasFurniture,Irregular,Distractor Number: 2,,,,,
+699.82,2,1,15,HasFurniture,Irregular,Distractor Number: 4,,,,,
+702,2,1,15,HasFurniture,Irregular,Distractor Number: 5,,,,,
+704.16,2,1,15,HasFurniture,Irregular,Distractor Number: 4,,,,,
+706.6,2,1,15,HasFurniture,Irregular,Distractor Number: 5,,,,,
+706.98,2,1,15,HasFurniture,Irregular,Distractor Number: 1,,,,,
+709.18,2,1,15,HasFurniture,Irregular,Distractor Number: 4,,,,,
+712.92,2,1,15,HasFurniture,Irregular,Distractor Number: 6,,,,,
+715.78,2,1,15,HasFurniture,Irregular,Distractor Number: 4,,,,,
+718.54,2,1,15,HasFurniture,Irregular,Distractor Number: 8,,,,,
+720.88,2,1,15,HasFurniture,Irregular,Distractor Number: 3,,,,,
+721.64,2,1,15,HasFurniture,Irregular,Recall Phase,,,,,
+731.5,2,1,15,HasFurniture,Irregular,Card,,26,0.03971314,-0.1265895,-1.631244
+734.24,2,1,15,HasFurniture,Irregular,Card,,11,-0.07868934,-0.4265896,1.203978
+736.36,2,1,15,HasFurniture,Irregular,Card,,21,-1.546508,-0.4265895,1.513021
+741.84,2,1,15,HasFurniture,Irregular,Card,,7,-2.597183,-0.6265896,0.4057345
+744.54,2,1,15,HasFurniture,Irregular,Card,,5,-2.709869,-0.4904213,-1.360306
+749.58,2,1,15,HasFurniture,Irregular,Result,,,,,
+752.24,3,2,15,HasFurniture,Irregular,Prepare Phase,,,,,
+757.5,3,2,15,HasFurniture,Irregular,Learning Phase,,,,,
+758.54,3,2,15,HasFurniture,Irregular,Card,15,,-0.5995785,-0.3283353,-1.774452
+763.2,3,2,15,HasFurniture,Irregular,Card,0,,0.4840924,-0.5783353,0.5569979
+765.44,3,2,15,HasFurniture,Irregular,Card,34,,-0.690994,0.1716647,1.304776
+771.12,3,2,15,HasFurniture,Irregular,Card,29,,-2.706913,0.1216648,-1.348255
+781.18,3,2,15,HasFurniture,Irregular,Card,9,,-1.573134,-0.7283353,1.483184
+781.18,3,2,15,HasFurniture,Irregular,Distractor,,,,,
+781.18,3,2,15,HasFurniture,Irregular,Distractor Number: 5,,,,,
+786.06,3,2,15,HasFurniture,Irregular,Distractor Number: 7,,,,,
+788.48,3,2,15,HasFurniture,Irregular,Distractor Number: 7,,,,,
+790.94,3,2,15,HasFurniture,Irregular,Distractor Number: 8,,,,,
+793.08,3,2,15,HasFurniture,Irregular,Distractor Number: 1,,,,,
+795.32,3,2,15,HasFurniture,Irregular,Distractor Number: 6,,,,,
+797.78,3,2,15,HasFurniture,Irregular,Distractor Number: 7,,,,,
+797.88,3,2,15,HasFurniture,Irregular,Recall Phase,,,,,
+804.26,3,2,15,HasFurniture,Irregular,Card,,26,0.0340296,-0.133211,-1.644031
+806.46,3,2,15,HasFurniture,Irregular,Card,,0,0.4752202,-0.5832111,0.5622901
+808.22,3,2,15,HasFurniture,Irregular,Card,,9,-1.584029,-0.733211,1.48397
+812.96,3,2,15,HasFurniture,Irregular,Card,,19,-2.623409,-0.3332111,0.3660744
+815.34,3,2,15,HasFurniture,Irregular,Card,,17,-2.711606,-0.183211,-1.349945
+819.24,3,2,15,HasFurniture,Irregular,Result,,,,,
+823.36,4,3,15,HasFurniture,Irregular,Prepare Phase,,,,,
+834.2,4,3,15,HasFurniture,Irregular,Learning Phase,,,,,
+836.7,4,3,15,HasFurniture,Irregular,Card,0,,0.4821355,-0.5729326,0.5689607
+841,4,3,15,HasFurniture,Irregular,Card,34,,-0.6948736,0.1770674,1.313709
+844.12,4,3,15,HasFurniture,Irregular,Card,32,,-2.459853,0.2270675,1.156075
+846.58,4,3,15,HasFurniture,Irregular,Card,18,,-2.812122,-0.3229326,-0.6091175
+849.22,4,3,15,HasFurniture,Irregular,Card,4,,-2.213618,-0.6229326,-1.44236
+850.62,4,3,15,HasFurniture,Irregular,Distractor,,,,,
+850.62,4,3,15,HasFurniture,Irregular,Distractor Number: 8,,,,,
+853.96,4,3,15,HasFurniture,Irregular,Distractor Number: 5,,,,,
+855.86,4,3,15,HasFurniture,Irregular,Distractor Number: 6,,,,,
+858.56,4,3,15,HasFurniture,Irregular,Distractor Number: 1,,,,,
+860.56,4,3,15,HasFurniture,Irregular,Distractor Number: 7,,,,,
+862.44,4,3,15,HasFurniture,Irregular,Distractor Number: 7,,,,,
+864.56,4,3,15,HasFurniture,Irregular,Distractor Number: 7,,,,,
+866.7,4,3,15,HasFurniture,Irregular,Recall Phase,,,,,
+870.98,4,3,15,HasFurniture,Irregular,Card,,2,0.05234349,-0.7460963,-1.644531
+875.8,4,3,15,HasFurniture,Irregular,Card,,34,-0.6617028,0.1539037,1.312264
+877.8,4,3,15,HasFurniture,Irregular,Card,,33,-1.542924,-0.1460962,1.495154
+883.42,4,3,15,HasFurniture,Irregular,Card,,6,-2.793617,-0.6460963,-0.5942882
+892.46,4,3,15,HasFurniture,Irregular,Card,,29,-2.691081,0.1039038,-1.330486
+896.42,4,3,15,HasFurniture,Irregular,Result,,,,,
+899.74,5,4,15,HasFurniture,Irregular,Prepare Phase,,,,,
+910.36,5,4,15,HasFurniture,Irregular,Learning Phase,,,,,
+914.34,5,4,15,HasFurniture,Irregular,Card,13,,0.3496623,-0.4179221,-0.1350247
+917.8,5,4,15,HasFurniture,Irregular,Card,11,,-0.09794748,-0.4179223,1.225911
+919.42,5,4,15,HasFurniture,Irregular,Card,21,,-1.570174,-0.4179221,1.513226
+925.02,5,4,15,HasFurniture,Irregular,Card,28,,-2.193878,-0.01792228,-1.42165
+925.58,5,4,15,HasFurniture,Irregular,Card,30,,-2.795911,-0.01792228,-0.5909532
+927.3,5,4,15,HasFurniture,Irregular,Distractor,,,,,
+927.3,5,4,15,HasFurniture,Irregular,Distractor Number: 3,,,,,
+932.2599,5,4,15,HasFurniture,Irregular,Distractor Number: 8,,,,,
+934.72,5,4,15,HasFurniture,Irregular,Distractor Number: 4,,,,,
+936.58,5,4,15,HasFurniture,Irregular,Distractor Number: 8,,,,,
+940.7599,5,4,15,HasFurniture,Irregular,Distractor Number: 8,,,,,
+943.1,5,4,15,HasFurniture,Irregular,Distractor Number: 3,,,,,
+944.62,5,4,15,HasFurniture,Irregular,Recall Phase,,,,,
+950.82,5,4,15,HasFurniture,Irregular,Card,,14,0.0500778,-0.4290402,-1.635301
+953.74,5,4,15,HasFurniture,Irregular,Card,,13,0.3564559,-0.4290402,-0.1669232
+957.82,5,4,15,HasFurniture,Irregular,Card,,35,-0.07347214,0.1709597,1.199701
+958,5,4,15,HasFurniture,Irregular,Card,,23,-0.07347214,-0.1290402,1.199701
+961.74,5,4,15,HasFurniture,Irregular,Card,,21,-1.54185,-0.4290402,1.506079
+972,5,4,15,HasFurniture,Irregular,Result,,,,,
+974.68,6,5,15,HasFurniture,Irregular,Prepare Phase,,,,,
+987.52,6,5,15,HasFurniture,Irregular,Learning Phase,,,,,
+991.56,6,5,15,HasFurniture,Irregular,Card,13,,0.3659277,-0.4341828,-0.1633336
+999.24,6,5,15,HasFurniture,Irregular,Card,28,,-2.190708,-0.03418291,-1.423736
+1028.42,6,5,15,HasFurniture,Irregular,Card,3,,-0.5995563,-0.6189995,-1.775784
+1034.6,6,5,15,HasFurniture,Irregular,Card,34,,-0.6822101,0.1904242,1.338637
+1038,6,5,15,HasFurniture,Irregular,Card,20,,-2.446772,-0.0595758,1.1764
+1044.54,6,5,15,HasFurniture,Irregular,Distractor,,,,,
+1044.54,6,5,15,HasFurniture,Irregular,Distractor Number: 4,,,,,
+1048.12,6,5,15,HasFurniture,Irregular,Distractor Number: 3,,,,,
+1052.46,6,5,15,HasFurniture,Irregular,Distractor Number: 8,,,,,
+1054.88,6,5,15,HasFurniture,Irregular,Distractor Number: 1,,,,,
+1057.2,6,5,15,HasFurniture,Irregular,Distractor Number: 1,,,,,
+1060.28,6,5,15,HasFurniture,Irregular,Distractor Number: 6,,,,,
+1061.04,6,5,15,HasFurniture,Irregular,Recall Phase,,,,,
+1065,6,5,15,HasFurniture,Irregular,Card,,4,-2.209268,-0.6138231,-1.455544
+1069.26,6,5,15,HasFurniture,Irregular,Card,,8,-2.448306,-0.3638231,1.143564
+1074.94,6,5,15,HasFurniture,Irregular,Card,,9,-1.565002,-0.7138231,1.474886
+1082.14,6,5,15,HasFurniture,Irregular,Card,,14,0.0456003,-0.413823,-1.65696
+1082.24,6,5,15,HasFurniture,Irregular,Card,,2,0.0456003,-0.7138231,-1.65696
+1088.52,6,5,15,HasFurniture,Irregular,Result,,,,,
+1397.96,7,Training,15,HasFurniture,Regular,Prepare Phase,,,,,
+1410.14,7,Training,15,HasFurniture,Regular,Learning Phase,,,,,
+1412.9,7,Training,15,HasFurniture,Regular,Card,2,,1.573823,0.8839608,-0.1512617
+1416.3,7,Training,15,HasFurniture,Regular,Card,25,,1.778497,1.483961,0.8275687
+1423.82,7,Training,15,HasFurniture,Regular,Card,11,,-0.3615682,0.8839608,2.807498
+1425.14,7,Training,15,HasFurniture,Regular,Card,20,,-0.9533202,1.183961,2.42042
+1427.56,7,Training,15,HasFurniture,Regular,Card,30,,-1.362668,1.483961,0.4627596
+1430.2,7,Training,15,HasFurniture,Regular,Distractor,,,,,
+1430.2,7,Training,15,HasFurniture,Regular,Distractor Number: 4,,,,,
+1434.92,7,Training,15,HasFurniture,Regular,Distractor Number: 8,,,,,
+1438.84,7,Training,15,HasFurniture,Regular,Distractor Number: 1,,,,,
+1441.22,7,Training,15,HasFurniture,Regular,Distractor Number: 6,,,,,
+1444.08,7,Training,15,HasFurniture,Regular,Distractor Number: 2,,,,,
+1447.56,7,Training,15,HasFurniture,Regular,Distractor Number: 7,,,,,
+1447.6,7,Training,15,HasFurniture,Regular,Recall Phase,,,,,
+1452.4,7,Training,15,HasFurniture,Regular,Card,,18,-1.362668,1.183961,0.4627596
+1457.9,7,Training,15,HasFurniture,Regular,Card,,20,-0.9533202,1.183961,2.42042
+1463.4,7,Training,15,HasFurniture,Regular,Card,,25,1.778497,1.483961,0.8275687
+1466.04,7,Training,15,HasFurniture,Regular,Card,,2,1.573823,0.8839608,-0.1512617
+1468.06,7,Training,15,HasFurniture,Regular,Card,,13,1.778497,1.183961,0.8275687
+1472.68,7,Training,15,HasFurniture,Regular,Result,,,,,
+1475.66,8,6,15,HasFurniture,Regular,Prepare Phase,,,,,
+1479.12,8,6,15,HasFurniture,Regular,Learning Phase,,,,,
+1481.36,8,6,15,HasFurniture,Regular,Card,27,,0.9820713,1.483961,-0.53834
+1487.46,8,6,15,HasFurniture,Regular,Card,25,,1.778497,1.483961,0.8275687
+1493.16,8,6,15,HasFurniture,Regular,Card,11,,-0.3615682,0.8839608,2.807498
+1498.58,8,6,15,HasFurniture,Regular,Card,17,,-0.9755895,1.183961,-0.1289924
+1532,8,6,15,HasFurniture,Regular,Card,7,,-1.17046,0.8958709,1.437603
+1532,8,6,15,HasFurniture,Regular,Distractor,,,,,
+1532,8,6,15,HasFurniture,Regular,Distractor Number: 4,,,,,
+1537.86,8,6,15,HasFurniture,Regular,Distractor Number: 8,,,,,
+1540.16,8,6,15,HasFurniture,Regular,Distractor Number: 2,,,,,
+1543.1,8,6,15,HasFurniture,Regular,Distractor Number: 8,,,,,
+1546.58,8,6,15,HasFurniture,Regular,Distractor Number: 2,,,,,
+1549.78,8,6,15,HasFurniture,Regular,Distractor Number: 2,,,,,
+1551.58,8,6,15,HasFurniture,Regular,Recall Phase,,,,,
+1558.94,8,6,15,HasFurniture,Regular,Card,,25,1.779332,1.492038,0.8306246
+1562.68,8,6,15,HasFurniture,Regular,Card,,26,1.575288,1.492038,-0.1483372
+1568.26,8,6,15,HasFurniture,Regular,Card,,6,-1.361598,0.8920382,0.4637941
+1572.46,8,6,15,HasFurniture,Regular,Card,,35,-0.3620072,1.492038,2.809177
+1579.2,8,6,15,HasFurniture,Regular,Card,,34,0.6169547,1.492038,2.605133
+1583.4,8,6,15,HasFurniture,Regular,Result,,,,,
+1587.74,9,7,15,HasFurniture,Regular,Prepare Phase,,,,,
+1602.34,9,7,15,HasFurniture,Regular,Learning Phase,,,,,
+1603.46,9,7,15,HasFurniture,Regular,Card,26,,1.575288,1.492038,-0.1483372
+1609.6,9,7,15,HasFurniture,Regular,Card,21,,1.595917,1.192038,2.401089
+1632.76,9,7,15,HasFurniture,Regular,Card,1,,1.779332,0.8920382,0.8306246
+1635.46,9,7,15,HasFurniture,Regular,Card,6,,-1.361598,0.8920382,0.4637941
+1639.02,9,7,15,HasFurniture,Regular,Card,35,,-0.3620072,1.492038,2.809177
+1639.02,9,7,15,HasFurniture,Regular,Distractor,,,,,
+1639.02,9,7,15,HasFurniture,Regular,Distractor Number: 6,,,,,
+1645,9,7,15,HasFurniture,Regular,Distractor Number: 5,,,,,
+1648.62,9,7,15,HasFurniture,Regular,Distractor Number: 1,,,,,
+1651.3,9,7,15,HasFurniture,Regular,Distractor Number: 8,,,,,
+1654.48,9,7,15,HasFurniture,Regular,Distractor Number: 2,,,,,
+1656.92,9,7,15,HasFurniture,Regular,Distractor Number: 7,,,,,
+1659.44,9,7,15,HasFurniture,Regular,Distractor Number: 4,,,,,
+1660,9,7,15,HasFurniture,Regular,Recall Phase,,,,,
+1668.38,9,7,15,HasFurniture,Regular,Card,,34,0.6169547,1.492038,2.605133
+1671.96,9,7,15,HasFurniture,Regular,Card,,25,1.779332,1.492038,0.8306246
+1681.32,9,7,15,HasFurniture,Regular,Card,,15,0.9837851,1.192038,-0.5357963
+1686.58,9,7,15,HasFurniture,Regular,Card,,29,-0.9741386,1.492038,-0.1277086
+1691.32,9,7,15,HasFurniture,Regular,Card,,31,-1.157554,1.492038,1.442756
+1694.38,9,7,15,HasFurniture,Regular,Result,,,,,
+1698.06,10,8,15,HasFurniture,Regular,Prepare Phase,,,,,
+1702.84,10,8,15,HasFurniture,Regular,Learning Phase,,,,,
+1704.2,10,8,15,HasFurniture,Regular,Card,15,,0.9837851,1.192038,-0.5357963
+1708.42,10,8,15,HasFurniture,Regular,Card,29,,-0.9741386,1.492038,-0.1277086
+1714.78,10,8,15,HasFurniture,Regular,Card,19,,-1.157554,1.192038,1.442756
+1718.08,10,8,15,HasFurniture,Regular,Card,35,,-0.3620072,1.492038,2.809177
+1721.62,10,8,15,HasFurniture,Regular,Card,1,,1.779332,0.8920382,0.8306246
+1722.72,10,8,15,HasFurniture,Regular,Distractor,,,,,
+1722.72,10,8,15,HasFurniture,Regular,Distractor Number: 5,,,,,
+1728.66,10,8,15,HasFurniture,Regular,Distractor Number: 1,,,,,
+1731.18,10,8,15,HasFurniture,Regular,Distractor Number: 4,,,,,
+1734.52,10,8,15,HasFurniture,Regular,Distractor Number: 1,,,,,
+1737.02,10,8,15,HasFurniture,Regular,Distractor Number: 5,,,,,
+1739.54,10,8,15,HasFurniture,Regular,Recall Phase,,,,,
+1744.24,10,8,15,HasFurniture,Regular,Card,,15,0.9837851,1.192038,-0.5357963
+1750,10,8,15,HasFurniture,Regular,Card,,19,-1.157554,1.192038,1.442756
+1759.72,10,8,15,HasFurniture,Regular,Card,,13,1.779332,1.192038,0.8306246
+1763.82,10,8,15,HasFurniture,Regular,Card,,23,-0.3620072,1.192038,2.809177
+1769.18,10,8,15,HasFurniture,Regular,Card,,22,0.6169547,1.192038,2.605133
+1771.8,10,8,15,HasFurniture,Regular,Result,,,,,
+1782.5,11,9,15,HasFurniture,Regular,Prepare Phase,,,,,
+1787.94,11,9,15,HasFurniture,Regular,Learning Phase,,,,,
+1791.6,11,9,15,HasFurniture,Regular,Card,25,,1.772797,1.509365,0.8422157
+1799.5,11,9,15,HasFurniture,Regular,Card,10,,0.6085059,0.9093648,2.615469
+1803.22,11,9,15,HasFurniture,Regular,Card,20,,-0.96176,1.209365,2.43036
+1805,11,9,15,HasFurniture,Regular,Card,29,,-0.9796382,1.509365,-0.1190876
+1825.12,11,9,15,HasFurniture,Regular,Card,0,,1.975784,0.9093648,1.821397
+1825.12,11,9,15,HasFurniture,Regular,Distractor,,,,,
+1825.12,11,9,15,HasFurniture,Regular,Distractor Number: 1,,,,,
+1832.4,11,9,15,HasFurniture,Regular,Distractor Number: 8,,,,,
+1835.46,11,9,15,HasFurniture,Regular,Distractor Number: 8,,,,,
+1839.16,11,9,15,HasFurniture,Regular,Distractor Number: 4,,,,,
+1842.84,11,9,15,HasFurniture,Regular,Recall Phase,,,,,
+1846.56,11,9,15,HasFurniture,Regular,Card,,0,1.975784,0.9093648,1.821397
+1852.98,11,9,15,HasFurniture,Regular,Card,,15,0.9787247,1.209365,-0.5250627
+1857.86,11,9,15,HasFurniture,Regular,Card,,6,-1.367735,0.9093648,0.4719969
+1865.32,11,9,15,HasFurniture,Regular,Card,,20,-0.96176,1.209365,2.43036
+1867,11,9,15,HasFurniture,Regular,Card,,11,-0.3706755,0.9093648,2.818457
+1876.78,11,9,15,HasFurniture,Regular,Result,,,,,
+1879.98,12,10,15,HasFurniture,Regular,Prepare Phase,,,,,
+1891.96,12,10,15,HasFurniture,Regular,Learning Phase,,,,,
+1893.88,12,10,15,HasFurniture,Regular,Card,15,,0.9787247,1.209365,-0.5250627
+1901.22,12,10,15,HasFurniture,Regular,Card,25,,1.772797,1.509365,0.8422157
+1903.66,12,10,15,HasFurniture,Regular,Card,22,,0.6085059,1.209365,2.615469
+1907.4,12,10,15,HasFurniture,Regular,Card,8,,-0.96176,0.9093648,2.43036
+1910.46,12,10,15,HasFurniture,Regular,Card,31,,-1.164748,1.509365,1.451178
+1911.22,12,10,15,HasFurniture,Regular,Distractor,,,,,
+1911.22,12,10,15,HasFurniture,Regular,Distractor Number: 3,,,,,
+1917.66,12,10,15,HasFurniture,Regular,Distractor Number: 1,,,,,
+1920.68,12,10,15,HasFurniture,Regular,Distractor Number: 5,,,,,
+1923.08,12,10,15,HasFurniture,Regular,Distractor Number: 4,,,,,
+1926.42,12,10,15,HasFurniture,Regular,Distractor Number: 3,,,,,
+1929.66,12,10,15,HasFurniture,Regular,Distractor Number: 1,,,,,
+1931.14,12,10,15,HasFurniture,Regular,Recall Phase,,,,,
+1935.18,12,10,15,HasFurniture,Regular,Card,,8,-0.9675646,0.9086445,2.422243
+1937.66,12,10,15,HasFurniture,Regular,Card,,19,-1.193523,1.229627,1.422091
+1941.74,12,10,15,HasFurniture,Regular,Card,,15,0.9827338,1.229627,-0.5179888
+1945.88,12,10,15,HasFurniture,Regular,Card,,14,1.567238,1.229627,-0.1200508
+1950.16,12,10,15,HasFurniture,Regular,Card,,9,1.542433,0.9296268,2.429339
+1964.08,12,10,15,HasFurniture,Regular,Result,,,,,
+2155.12,13,Training,15,NoFurniture,Irregular,Prepare Phase,,,,,
+2160.52,13,Training,15,NoFurniture,Irregular,Learning Phase,,,,,
+2166.12,13,Training,15,NoFurniture,Irregular,Card,4,,0.9960966,-0.05586988,3.284198
+2168.98,13,Training,15,NoFurniture,Irregular,Card,6,,1.582048,-0.05586988,2.442081
+2176.14,13,Training,15,NoFurniture,Irregular,Card,21,,0.3160844,0.1441302,0.3618557
+2180.74,13,Training,15,NoFurniture,Irregular,Card,35,,-1.150346,0.7441301,0.6774213
+2183.74,13,Training,15,NoFurniture,Irregular,Card,13,,-1.571709,0.1441302,2.046711
+2185.7,13,Training,15,NoFurniture,Irregular,Distractor,,,,,
+2185.7,13,Training,15,NoFurniture,Irregular,Distractor Number: 4,,,,,
+2195.4,13,Training,15,NoFurniture,Irregular,Distractor Number: 6,,,,,
+2197.62,13,Training,15,NoFurniture,Irregular,Distractor Number: 2,,,,,
+2200.54,13,Training,15,NoFurniture,Irregular,Distractor Number: 5,,,,,
+2203.8,13,Training,15,NoFurniture,Irregular,Distractor Number: 8,,,,,
+2206.14,13,Training,15,NoFurniture,Irregular,Recall Phase,,,,,
+2217.2,13,Training,15,NoFurniture,Irregular,Card,,8,1.203369,0.1941302,0.6823642
+2225.1,13,Training,15,NoFurniture,Irregular,Card,,11,-1.150346,0.1441301,0.6774213
+2234,13,Training,15,NoFurniture,Irregular,Card,,12,-1.729492,0.2941301,1.313495
+2241.56,13,Training,15,NoFurniture,Irregular,Card,,17,1.484907,0.3941302,3.179009
+2244.16,13,Training,15,NoFurniture,Irregular,Card,,19,1.371671,0.2441301,1.464461
+2249.6,13,Training,15,NoFurniture,Irregular,Result,,,,,
+2254.04,14,11,15,NoFurniture,Irregular,Prepare Phase,,,,,
+2261.5,14,11,15,NoFurniture,Irregular,Learning Phase,,,,,
+2267.46,14,11,15,NoFurniture,Irregular,Card,28,,0.9960966,0.5441301,3.284198
+2270.1,14,11,15,NoFurniture,Irregular,Card,18,,1.582048,0.2441301,2.442081
+2271.14,14,11,15,NoFurniture,Irregular,Card,8,,1.203369,0.1941302,0.6823642
+2274.68,14,11,15,NoFurniture,Irregular,Card,10,,-0.5637739,0.1441301,0.5511951
+2276.76,14,11,15,NoFurniture,Irregular,Card,24,,-1.729492,0.5941302,1.313495
+2278.04,14,11,15,NoFurniture,Irregular,Distractor,,,,,
+2278.04,14,11,15,NoFurniture,Irregular,Distractor Number: 7,,,,,
+2284.46,14,11,15,NoFurniture,Irregular,Distractor Number: 7,,,,,
+2286.74,14,11,15,NoFurniture,Irregular,Distractor Number: 2,,,,,
+2289.3,14,11,15,NoFurniture,Irregular,Distractor Number: 8,,,,,
+2291.54,14,11,15,NoFurniture,Irregular,Distractor Number: 7,,,,,
+2294.06,14,11,15,NoFurniture,Irregular,Distractor Number: 5,,,,,
+2296.2,14,11,15,NoFurniture,Irregular,Recall Phase,,,,,
+2302.66,14,11,15,NoFurniture,Irregular,Card,,16,0.9960966,0.2441301,3.284198
+2305.64,14,11,15,NoFurniture,Irregular,Card,,6,1.582048,-0.05586988,2.442081
+2309.28,14,11,15,NoFurniture,Irregular,Card,,20,1.203369,0.4941301,0.6823642
+2316.24,14,11,15,NoFurniture,Irregular,Card,,23,-1.150346,0.4441302,0.6774213
+2317.96,14,11,15,NoFurniture,Irregular,Card,,12,-1.729492,0.2941301,1.313495
+2328.96,14,11,15,NoFurniture,Irregular,Result,,,,,
+2335.9,15,12,15,NoFurniture,Irregular,Prepare Phase,,,,,
+2340.06,15,12,15,NoFurniture,Irregular,Learning Phase,,,,,
+2340.7,15,12,15,NoFurniture,Irregular,Card,15,,-0.6169769,0.2441301,3.63132
+2345.58,15,12,15,NoFurniture,Irregular,Card,5,,1.484907,0.09413016,3.179009
+2353.52,15,12,15,NoFurniture,Irregular,Card,33,,0.3160844,0.4441302,0.3618557
+2354.06,15,12,15,NoFurniture,Irregular,Card,10,,-0.5637739,0.1441301,0.5511951
+2358.24,15,12,15,NoFurniture,Irregular,Card,24,,-1.729492,0.5941302,1.313495
+2358.88,15,12,15,NoFurniture,Irregular,Distractor,,,,,
+2358.88,15,12,15,NoFurniture,Irregular,Distractor Number: 5,,,,,
+2365.74,15,12,15,NoFurniture,Irregular,Distractor Number: 3,,,,,
+2368.5,15,12,15,NoFurniture,Irregular,Distractor Number: 7,,,,,
+2371.7,15,12,15,NoFurniture,Irregular,Distractor Number: 5,,,,,
+2375.06,15,12,15,NoFurniture,Irregular,Distractor Number: 3,,,,,
+2377.56,15,12,15,NoFurniture,Irregular,Recall Phase,,,,,
+2382.32,15,12,15,NoFurniture,Irregular,Card,,15,-0.6169769,0.2441301,3.63132
+2388.26,15,12,15,NoFurniture,Irregular,Card,,5,1.484907,0.09413016,3.179009
+2395.44,15,12,15,NoFurniture,Irregular,Card,,20,1.203369,0.4941301,0.6823642
+2397.8,15,12,15,NoFurniture,Irregular,Card,,21,0.3160844,0.1441302,0.3618557
+2399.82,15,12,15,NoFurniture,Irregular,Card,,23,-1.150346,0.4441302,0.6774213
+2406.2,15,12,15,NoFurniture,Irregular,Result,,,,,
+2409.9,16,13,15,NoFurniture,Irregular,Prepare Phase,,,,,
+2416.5,16,13,15,NoFurniture,Irregular,Learning Phase,,,,,
+2417.68,16,13,15,NoFurniture,Irregular,Card,14,,-1.256143,0.1441302,3.513141
+2425.08,16,13,15,NoFurniture,Irregular,Card,11,,-1.150346,0.1441301,0.6774213
+2427.44,16,13,15,NoFurniture,Irregular,Card,21,,0.3160844,0.1441302,0.3618557
+2431.42,16,13,15,NoFurniture,Irregular,Card,31,,1.371671,0.5441301,1.464461
+2434.42,16,13,15,NoFurniture,Irregular,Card,28,,0.9960966,0.5441301,3.284198
+2435.3,16,13,15,NoFurniture,Irregular,Distractor,,,,,
+2435.3,16,13,15,NoFurniture,Irregular,Distractor Number: 1,,,,,
+2443.94,16,13,15,NoFurniture,Irregular,Distractor Number: 2,,,,,
+2446.38,16,13,15,NoFurniture,Irregular,Distractor Number: 3,,,,,
+2450,16,13,15,NoFurniture,Irregular,Distractor Number: 8,,,,,
+2452.74,16,13,15,NoFurniture,Irregular,Distractor Number: 6,,,,,
+2455.16,16,13,15,NoFurniture,Irregular,Recall Phase,,,,,
+2461.92,16,13,15,NoFurniture,Irregular,Card,,16,0.9960966,0.2441301,3.284198
+2466.82,16,13,15,NoFurniture,Irregular,Card,,30,1.582048,0.5441301,2.442081
+2468.6,16,13,15,NoFurniture,Irregular,Card,,8,1.203369,0.1941302,0.6823642
+2473.26,16,13,15,NoFurniture,Irregular,Card,,21,0.3160844,0.1441302,0.3618557
+2477.14,16,13,15,NoFurniture,Irregular,Card,,23,-1.150346,0.4441302,0.6774213
+2487.54,16,13,15,NoFurniture,Irregular,Result,,,,,
+2492.6,17,14,15,NoFurniture,Irregular,Prepare Phase,,,,,
+2502.86,17,14,15,NoFurniture,Irregular,Learning Phase,,,,,
+2507.62,17,14,15,NoFurniture,Irregular,Card,12,,-1.729492,0.2941301,1.313495
+2511.06,17,14,15,NoFurniture,Irregular,Card,34,,-0.5637739,0.7441301,0.5511951
+2512.76,17,14,15,NoFurniture,Irregular,Card,9,,0.3160844,-0.1558698,0.3618557
+2517.66,17,14,15,NoFurniture,Irregular,Card,5,,1.484907,0.09413016,3.179009
+2518.8,17,14,15,NoFurniture,Irregular,Card,30,,1.582048,0.5441301,2.442081
+2519.4,17,14,15,NoFurniture,Irregular,Distractor,,,,,
+2519.4,17,14,15,NoFurniture,Irregular,Distractor Number: 1,,,,,
+2524.36,17,14,15,NoFurniture,Irregular,Distractor Number: 3,,,,,
+2527.36,17,14,15,NoFurniture,Irregular,Distractor Number: 8,,,,,
+2530.2,17,14,15,NoFurniture,Irregular,Distractor Number: 2,,,,,
+2532.96,17,14,15,NoFurniture,Irregular,Distractor Number: 5,,,,,
+2535.88,17,14,15,NoFurniture,Irregular,Distractor Number: 7,,,,,
+2536.52,17,14,15,NoFurniture,Irregular,Recall Phase,,,,,
+2541.7,17,14,15,NoFurniture,Irregular,Card,,2,-1.256143,-0.1558698,3.513141
+2546.06,17,14,15,NoFurniture,Irregular,Card,,12,-1.729492,0.2941301,1.313495
+2548.78,17,14,15,NoFurniture,Irregular,Card,,11,-1.150346,0.1441301,0.6774213
+2550.66,17,14,15,NoFurniture,Irregular,Card,,21,0.3160844,0.1441302,0.3618557
+2557.34,17,14,15,NoFurniture,Irregular,Card,,8,1.203369,0.1941302,0.6823642
+2562.3,17,14,15,NoFurniture,Irregular,Result,,,,,
+2564.62,18,15,15,NoFurniture,Irregular,Prepare Phase,,,,,
+2566.44,18,15,15,NoFurniture,Irregular,Learning Phase,,,,,
+2566.8,18,15,15,NoFurniture,Irregular,Card,27,,-0.6169769,0.5441301,3.63132
+2575.04,18,15,15,NoFurniture,Irregular,Card,4,,0.9960966,-0.05586988,3.284198
+2577.5,18,15,15,NoFurniture,Irregular,Card,20,,1.203369,0.4941301,0.6823642
+2580.26,18,15,15,NoFurniture,Irregular,Card,10,,-0.5637739,0.1441301,0.5511951
+2582.52,18,15,15,NoFurniture,Irregular,Card,13,,-1.571709,0.1441302,2.046711
+2583.12,18,15,15,NoFurniture,Irregular,Distractor,,,,,
+2583.12,18,15,15,NoFurniture,Irregular,Distractor Number: 7,,,,,
+2590.22,18,15,15,NoFurniture,Irregular,Distractor Number: 5,,,,,
+2593.12,18,15,15,NoFurniture,Irregular,Distractor Number: 2,,,,,
+2595.16,18,15,15,NoFurniture,Irregular,Distractor Number: 6,,,,,
+2598.24,18,15,15,NoFurniture,Irregular,Distractor Number: 3,,,,,
+2600.6,18,15,15,NoFurniture,Irregular,Recall Phase,,,,,
+2606.36,18,15,15,NoFurniture,Irregular,Card,,23,-1.150346,0.4441302,0.6774213
+2612.06,18,15,15,NoFurniture,Irregular,Card,,2,-1.256143,-0.1558698,3.513141
+2616.16,18,15,15,NoFurniture,Irregular,Card,,5,1.484907,0.09413016,3.179009
+2619.32,18,15,15,NoFurniture,Irregular,Card,,27,-0.6169769,0.5441301,3.63132
+2625.56,18,15,15,NoFurniture,Irregular,Card,,8,1.203369,0.1941302,0.6823642
+2629.58,18,15,15,NoFurniture,Irregular,Result,,,,,
+2868.64,19,Training,15,NoFurniture,Regular,Prepare Phase,,,,,
+2874.18,19,Training,15,NoFurniture,Regular,Learning Phase,,,,,
+2876.32,19,Training,15,NoFurniture,Regular,Card,15,,-0.8524074,0.1193333,3.068058
+2882.26,19,Training,15,NoFurniture,Regular,Card,6,,1.479482,-0.1806668,2.037382
+2886.44,19,Training,15,NoFurniture,Regular,Card,35,,0.4488063,0.4193332,-0.2945069
+2889.44,19,Training,15,NoFurniture,Regular,Card,10,,-0.5273569,-0.1806668,-0.07746935
+2890.74,19,Training,15,NoFurniture,Regular,Card,25,,-1.666045,0.4193332,1.712332
+2891.48,19,Training,15,NoFurniture,Regular,Distractor,,,,,
+2891.48,19,Training,15,NoFurniture,Regular,Distractor Number: 7,,,,,
+2895.7,19,Training,15,NoFurniture,Regular,Distractor Number: 1,,,,,
+2898.1,19,Training,15,NoFurniture,Regular,Distractor Number: 1,,,,,
+2900.5,19,Training,15,NoFurniture,Regular,Distractor Number: 6,,,,,
+2903.64,19,Training,15,NoFurniture,Regular,Distractor Number: 4,,,,,
+2906.22,19,Training,15,NoFurniture,Regular,Distractor Number: 7,,,,,
+2908.12,19,Training,15,NoFurniture,Regular,Recall Phase,,,,,
+2914.68,19,Training,15,NoFurniture,Regular,Card,,15,-0.8524074,0.1193333,3.068058
+2917.42,19,Training,15,NoFurniture,Regular,Card,,12,-1.883083,0.1193333,0.7361686
+2920.54,19,Training,15,NoFurniture,Regular,Card,,2,-1.449008,-0.1806668,2.688495
+2925.14,19,Training,15,NoFurniture,Regular,Card,,9,-1.50352,-0.1806668,0.1395682
+2926.66,19,Training,15,NoFurniture,Regular,Card,,22,-0.5273569,0.1193333,-0.07746935
+2935.72,19,Training,15,NoFurniture,Regular,Result,,,,,
+2940.66,20,16,15,NoFurniture,Regular,Prepare Phase,,,,,
+2945.2,20,16,15,NoFurniture,Regular,Learning Phase,,,,,
+2945.24,20,16,15,NoFurniture,Regular,Card,16,,0.1237559,0.1193333,2.85102
+2951.78,20,16,15,NoFurniture,Regular,Card,6,,1.479482,-0.1806668,2.037382
+2954.38,20,16,15,NoFurniture,Regular,Card,20,,1.045407,0.1193333,0.08505583
+2958.54,20,16,15,NoFurniture,Regular,Card,34,,-0.5273569,0.4193332,-0.07746935
+2962.16,20,16,15,NoFurniture,Regular,Card,0,,-1.883083,-0.1806668,0.7361686
+2962.66,20,16,15,NoFurniture,Regular,Distractor,,,,,
+2962.66,20,16,15,NoFurniture,Regular,Distractor Number: 8,,,,,
+2968.38,20,16,15,NoFurniture,Regular,Distractor Number: 7,,,,,
+2970.5,20,16,15,NoFurniture,Regular,Distractor Number: 8,,,,,
+2973.02,20,16,15,NoFurniture,Regular,Distractor Number: 1,,,,,
+2975.68,20,16,15,NoFurniture,Regular,Distractor Number: 6,,,,,
+2978.28,20,16,15,NoFurniture,Regular,Distractor Number: 3,,,,,
+2980.24,20,16,15,NoFurniture,Regular,Recall Phase,,,,,
+2986.44,20,16,15,NoFurniture,Regular,Card,,15,-0.8524074,0.1193333,3.068058
+2992.22,20,16,15,NoFurniture,Regular,Card,,18,1.479482,0.1193333,2.037382
+2994.74,20,16,15,NoFurniture,Regular,Card,,8,1.045407,-0.1806668,0.08505583
+2999.14,20,16,15,NoFurniture,Regular,Card,,22,-0.5273569,0.1193333,-0.07746935
+3001.96,20,16,15,NoFurniture,Regular,Card,,12,-1.883083,0.1193333,0.7361686
+3006.26,20,16,15,NoFurniture,Regular,Result,,,,,
+3010.58,21,17,15,NoFurniture,Regular,Prepare Phase,,,,,
+3014.74,21,17,15,NoFurniture,Regular,Learning Phase,,,,,
+3017.96,21,17,15,NoFurniture,Regular,Card,16,,0.1237559,0.1193333,2.85102
+3021.58,21,17,15,NoFurniture,Regular,Card,1,,-1.666045,-0.1806668,1.712332
+3022.5,21,17,15,NoFurniture,Regular,Card,26,,-1.449008,0.4193332,2.688495
+3027.44,21,17,15,NoFurniture,Regular,Card,34,,-0.5273569,0.4193332,-0.07746935
+3029.64,21,17,15,NoFurniture,Regular,Card,11,,0.4488063,-0.1806668,-0.2945069
+3031.56,21,17,15,NoFurniture,Regular,Distractor,,,,,
+3031.56,21,17,15,NoFurniture,Regular,Distractor Number: 1,,,,,
+3036.12,21,17,15,NoFurniture,Regular,Distractor Number: 4,,,,,
+3039.24,21,17,15,NoFurniture,Regular,Distractor Number: 5,,,,,
+3041.72,21,17,15,NoFurniture,Regular,Distractor Number: 2,,,,,
+3044.18,21,17,15,NoFurniture,Regular,Distractor Number: 2,,,,,
+3047.08,21,17,15,NoFurniture,Regular,Distractor Number: 7,,,,,
+3049.56,21,17,15,NoFurniture,Regular,Recall Phase,,,,,
+3052.88,21,17,15,NoFurniture,Regular,Card,,16,0.1237559,0.1193333,2.85102
+3056.4,21,17,15,NoFurniture,Regular,Card,,11,0.4488063,-0.1806668,-0.2945069
+3057.78,21,17,15,NoFurniture,Regular,Card,,22,-0.5273569,0.1193333,-0.07746935
+3059.32,21,17,15,NoFurniture,Regular,Card,,9,-1.50352,-0.1806668,0.1395682
+3063.34,21,17,15,NoFurniture,Regular,Card,,14,-1.449008,0.1193333,2.688495
+3065.98,21,17,15,NoFurniture,Regular,Result,,,,,
+3069.02,22,18,15,NoFurniture,Regular,Prepare Phase,,,,,
+3073.94,22,18,15,NoFurniture,Regular,Learning Phase,,,,,
+3076.02,22,18,15,NoFurniture,Regular,Card,28,,0.1237559,0.4193332,2.85102
+3082.32,22,18,15,NoFurniture,Regular,Card,23,,0.4488063,0.1193333,-0.2945069
+3084.38,22,18,15,NoFurniture,Regular,Card,21,,-1.50352,0.1193333,0.1395682
+3087.1,22,18,15,NoFurniture,Regular,Card,1,,-1.666045,-0.1806668,1.712332
+3089.28,22,18,15,NoFurniture,Regular,Card,26,,-1.449008,0.4193332,2.688495
+3090.78,22,18,15,NoFurniture,Regular,Distractor,,,,,
+3090.78,22,18,15,NoFurniture,Regular,Distractor Number: 4,,,,,
+3098.32,22,18,15,NoFurniture,Regular,Distractor Number: 5,,,,,
+3103.34,22,18,15,NoFurniture,Regular,Distractor Number: 4,,,,,
+3106.18,22,18,15,NoFurniture,Regular,Distractor Number: 1,,,,,
+3108.96,22,18,15,NoFurniture,Regular,Distractor Number: 5,,,,,
+3111.54,22,18,15,NoFurniture,Regular,Distractor Number: 2,,,,,
+3114.34,22,18,15,NoFurniture,Regular,Distractor Number: 5,,,,,
+3114.86,22,18,15,NoFurniture,Regular,Recall Phase,,,,,
+3119.86,22,18,15,NoFurniture,Regular,Card,,16,0.1237559,0.1193333,2.85102
+3122.82,22,18,15,NoFurniture,Regular,Card,,23,0.4488063,0.1193333,-0.2945069
+3124.96,22,18,15,NoFurniture,Regular,Card,,21,-1.50352,0.1193333,0.1395682
+3134.82,22,18,15,NoFurniture,Regular,Card,,2,-1.449008,-0.1806668,2.688495
+3139.98,22,18,15,NoFurniture,Regular,Card,,24,-1.883083,0.4193332,0.7361686
+3142.62,22,18,15,NoFurniture,Regular,Result,,,,,
+3145.28,23,19,15,NoFurniture,Regular,Prepare Phase,,,,,
+3149.46,23,19,15,NoFurniture,Regular,Learning Phase,,,,,
+3152.84,23,19,15,NoFurniture,Regular,Card,14,,-1.449008,0.1193333,2.688495
+3157.72,23,19,15,NoFurniture,Regular,Card,9,,-1.50352,-0.1806668,0.1395682
+3158.54,23,19,15,NoFurniture,Regular,Card,0,,-1.883083,-0.1806668,0.7361686
+3161.26,23,19,15,NoFurniture,Regular,Card,34,,-0.5273569,0.4193332,-0.07746935
+3165.04,23,19,15,NoFurniture,Regular,Card,29,,1.099919,0.4193332,2.633983
+3166.22,23,19,15,NoFurniture,Regular,Distractor,,,,,
+3166.22,23,19,15,NoFurniture,Regular,Distractor Number: 3,,,,,
+3172.94,23,19,15,NoFurniture,Regular,Distractor Number: 8,,,,,
+3173.2,23,19,15,NoFurniture,Regular,Distractor Number: 1,,,,,
+3173.26,23,19,15,NoFurniture,Regular,Distractor Number: 5,,,,,
+3173.28,23,19,15,NoFurniture,Regular,Distractor Number: 1,,,,,
+3173.38,23,19,15,NoFurniture,Regular,Distractor Number: 2,,,,,
+3177.66,23,19,15,NoFurniture,Regular,Distractor Number: 3,,,,,
+3180.94,23,19,15,NoFurniture,Regular,Distractor Number: 1,,,,,
+3183.58,23,19,15,NoFurniture,Regular,Distractor Number: 1,,,,,
+3186,23,19,15,NoFurniture,Regular,Distractor Number: 8,,,,,
+3188.42,23,19,15,NoFurniture,Regular,Recall Phase,,,,,
+3193.1,23,19,15,NoFurniture,Regular,Card,,17,1.099919,0.1193333,2.633983
+3198.5,23,19,15,NoFurniture,Regular,Card,,14,-1.449008,0.1193333,2.688495
+3200.36,23,19,15,NoFurniture,Regular,Card,,15,-0.8524074,0.1193333,3.068058
+3203.46,23,19,15,NoFurniture,Regular,Card,,12,-1.883083,0.1193333,0.7361686
+3204.8,23,19,15,NoFurniture,Regular,Card,,9,-1.50352,-0.1806668,0.1395682
+3212.74,23,19,15,NoFurniture,Regular,Result,,,,,
+3215.6,24,20,15,NoFurniture,Regular,Prepare Phase,,,,,
+3217.24,24,20,15,NoFurniture,Regular,Learning Phase,,,,,
+3219.92,24,20,15,NoFurniture,Regular,Card,15,,-0.8524074,0.1193333,3.068058
+3226.2,24,20,15,NoFurniture,Regular,Card,1,,-1.666045,-0.1806668,1.712332
+3229.9,24,20,15,NoFurniture,Regular,Card,22,,-0.5273569,0.1193333,-0.07746935
+3233.34,24,20,15,NoFurniture,Regular,Card,32,,1.045407,0.4193332,0.08505583
+3235.02,24,20,15,NoFurniture,Regular,Card,7,,1.262444,-0.1806668,1.061219
+3235.1,24,20,15,NoFurniture,Regular,Distractor,,,,,
+3235.1,24,20,15,NoFurniture,Regular,Distractor Number: 8,,,,,
+3241.2,24,20,15,NoFurniture,Regular,Distractor Number: 4,,,,,
+3245.62,24,20,15,NoFurniture,Regular,Distractor Number: 2,,,,,
+3249.02,24,20,15,NoFurniture,Regular,Distractor Number: 3,,,,,
+3251.98,24,20,15,NoFurniture,Regular,Distractor Number: 1,,,,,
+3252.78,24,20,15,NoFurniture,Regular,Recall Phase,,,,,
+3259,24,20,15,NoFurniture,Regular,Card,,15,-0.8524074,0.1193333,3.068058
+3263.64,24,20,15,NoFurniture,Regular,Card,,18,1.479482,0.1193333,2.037382
+3266.64,24,20,15,NoFurniture,Regular,Card,,8,1.045407,-0.1806668,0.08505583
+3268.8,24,20,15,NoFurniture,Regular,Card,,10,-0.5273569,-0.1806668,-0.07746935
+3270.46,24,20,15,NoFurniture,Regular,Card,,33,-1.50352,0.4193332,0.1395682
+3275.88,24,20,15,NoFurniture,Regular,Result,,,,,

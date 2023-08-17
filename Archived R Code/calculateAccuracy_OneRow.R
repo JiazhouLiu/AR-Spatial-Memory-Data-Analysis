@@ -1,0 +1,429 @@
+#install.packages("RcppHungarian")
+#install.packages("effectsize")
+#install.packages("pwr")
+
+library(RcppHungarian)
+library(ggplot2)
+library(dplyr)
+library("effectsize")
+library("pwr")
+
+### Functions ###
+euclidean_dist <- function(x, y) sqrt(sum((x - y)^2))
+
+data_summary <- function(data, varname, groupnames){
+  require(plyr)
+  summary_func <- function(x, col){
+    c(mean = mean(x[[col]], na.rm=TRUE),
+      sd = sd(x[[col]], na.rm=TRUE), 
+      se = sd(x[[col]], na.rm=TRUE)/sqrt(12),
+      ic = sd(x[[col]], na.rm=TRUE)/sqrt(12) * qt((1-0.05)/2 + .5, 11))
+  }
+  data_sum<-ddply(data, groupnames, .fun=summary_func,
+                  varname)
+  data_sum <- rename(data_sum, c("mean" = varname))
+  return(data_sum)
+}
+
+### Pre-defined variables ###
+set.seed(593903)
+difficulty <- 5
+vectorDim <- 3
+removeDiscardedTrials <- FALSE
+removeDiscardedTrialsTimeout <- 20
+
+### initiate data frames for analysis
+AccuracyDF <- data.frame(
+  Participant = rep(c(1:16), each = 4),
+  Condition = rep(c("Has+Regular", "No+Irregular", "Has+Irregular", "No+Regular"), times = 16),
+  Furniture = rep(c("Has Furniture", "No Furniture", "Has Furniture", "No Furniture"), times = 16),
+  Layout = rep(c("Regular", "Irregular", "Irregular", "Regular"), times = 16),
+  Accuracy = rep(c(0), times = 64),
+  EuclideanError = rep(c(0), times = 64)
+)
+
+### testing ###
+# setwd("~/R Projects/ARSpatialMemory/Data/participant 2")
+# InteractionFilepattern <- list.files(pattern="*_Interaction.csv")
+# readInteractionFile <- read.csv(InteractionFilepattern, header=TRUE)
+
+NoParticipant <- 0
+
+### Loop for all participant files
+for(par in 1:16){
+  dirPath <- paste(c("~/R Projects/ARSpatialMemory/Data/participant", par), collapse = " ")
+  if(dir.exists(dirPath)){
+    setwd(dirPath)
+    NoParticipant <- NoParticipant + 1
+    
+    ### Experiment Data ###
+    UserFilePattern <- list.files(pattern="*_trialCards.csv")
+    TaskFilePattern <- list.files(pattern="*_answerCards.csv")
+    InteractionFilepattern <- list.files(pattern="*_Interaction.csv")
+    
+    readUserFile <- read.csv(UserFilePattern, header=FALSE)
+    readTaskFile <- read.csv(TaskFilePattern, header=FALSE)
+    readInteractionFile <- read.csv(InteractionFilepattern, header=TRUE)
+    
+    AccuracyResult<- c()
+    EuclErrorResult <- c()
+    
+    ### Calculate interaction time
+    InteractionFileSubset <- readInteractionFile[(readInteractionFile$Info == "Learning Phase" | readInteractionFile$Info == "Distractor") & readInteractionFile$TrialID != "Training",]
+    timeCal <- c()
+    rowN <- 1
+    while (rowN < nrow(InteractionFileSubset)) {
+      timeCal <- c(timeCal, InteractionFileSubset[rowN + 1, 1] - InteractionFileSubset[rowN, 1])
+      rowN <- rowN + 2
+    }
+    
+    for(row in 1:nrow(readUserFile)){
+      UserCards <- c()
+      UserCard1 <- c()
+      UserCard2 <- c()
+      UserCard3 <- c()
+      UserCard4 <- c()
+      UserCard5 <- c()
+      
+      TaskCards <- c()
+      TaskCard1 <- c()
+      TaskCard2 <- c()
+      TaskCard3 <- c()
+      TaskCard4 <- c()
+      TaskCard5 <- c()
+      
+      for(col in 1:20){
+        if((col-1) %% 4 == 0){
+          UserCards <- c(UserCards, readUserFile[row,col])
+        }else{
+          if((col-1) %/% 4 == 0){
+            UserCard1 <- c(UserCard1, readUserFile[row,col])
+          }else if((col-1) %/% 4 == 1){
+            UserCard2 <- c(UserCard2, readUserFile[row,col])
+          }else if((col-1) %/% 4 == 2){
+            UserCard3 <- c(UserCard3, readUserFile[row,col])
+          }else if((col-1) %/% 4 == 3){
+            UserCard4 <- c(UserCard4, readUserFile[row,col])
+          }else if((col-1) %/% 4 == 4){
+            UserCard5 <- c(UserCard5, readUserFile[row,col])
+          }
+        }
+      }
+      
+      for(col in 1:20){
+        
+        if((col-1) %% 4 == 0){
+          TaskCards <- c(TaskCards, readTaskFile[row,col])
+        }else{
+          if((col-1) %/% 4 == 0){
+            TaskCard1 <- c(TaskCard1, readTaskFile[row,col])
+          }else if((col-1) %/% 4 == 1){
+            TaskCard2 <- c(TaskCard2, readTaskFile[row,col])
+          }else if((col-1) %/% 4 == 2){
+            TaskCard3 <- c(TaskCard3, readTaskFile[row,col])
+          }else if((col-1) %/% 4 == 3){
+            TaskCard4 <- c(TaskCard4, readTaskFile[row,col])
+          }else if((col-1) %/% 4 == 4){
+            TaskCard5 <- c(TaskCard5, readTaskFile[row,col])
+          }
+        }
+      }
+      
+      ### Data into Array ###
+      UserArray <- array(c(UserCard1,UserCard2,UserCard3,UserCard4,UserCard5), dim = c(vectorDim, difficulty))
+      UserDiffArray <- UserArray[,match(setdiff(UserCards,TaskCards),UserCards)]
+      
+      TaskArray <- array(c(TaskCard1,TaskCard2,TaskCard3,TaskCard4,TaskCard5), dim = c(vectorDim, difficulty))
+      TaskDiffArray <- TaskArray[,match(setdiff(TaskCards,UserCards),TaskCards)]
+      ### Analyse data ###
+      if(length(match(setdiff(TaskCards,UserCards),TaskCards)) == 0){
+        ### Result ###
+        AccuracyResult <- c(AccuracyResult, 1)
+        EuclErrorResult <- c(EuclErrorResult, 0)
+      }else if(length(match(setdiff(TaskCards,UserCards),TaskCards)) == 1){
+        ### Result ###
+        AccuracyResult <- c(AccuracyResult, (difficulty - length(match(setdiff(TaskCards,UserCards),TaskCards))) / difficulty)
+        EuclErrorResult <- c(EuclErrorResult, euclidean_dist(UserDiffArray, TaskDiffArray))
+      }else if(length(match(setdiff(TaskCards,UserCards),TaskCards)) > 1){
+        tmpVec <- c()
+        for (a in 1:length(UserDiffArray[1,])) {
+          for (b in 1:length(TaskDiffArray[1,])) {
+            dist <- euclidean_dist(UserDiffArray[,a], TaskDiffArray[,b])
+            tmpVec <- c(tmpVec,dist)
+          }
+        }
+        DistArray <- array(tmpVec, dim = c(length(UserDiffArray[1,]),length(TaskDiffArray[1,])))
+        
+        ### Result ###
+        AccuracyResult <- c(AccuracyResult, (difficulty - length(UserDiffArray[1,])) / difficulty)
+        EuclErrorResult <- c(EuclErrorResult, HungarianSolver(DistArray)$cost)
+      }
+    }
+    
+    FinalResult <- data.frame(cbind(AccuracyResult, EuclErrorResult, timeCal))
+    
+################################## write to CSV for presentation ########################
+    FinalResultTable <- rbind(c("NA", "NA", "NA"), FinalResult[1:5,], c("NA", "NA", "NA"), FinalResult[6:10,], c("NA", "NA", "NA"), FinalResult[11:15,], c("NA", "NA", "NA"), FinalResult[16:20,])
+    
+    write.table(FinalResultTable, paste(c("../FinalResult_", par, ".csv"), collapse = ""), sep = ",", col.names = FALSE, row.names = FALSE)
+    
+################################## write to DataFrame for analysis #####################
+    Condition1DF <- FinalResult[1:5, ]
+    Condition2DF <- FinalResult[6:10, ]
+    Condition3DF <- FinalResult[11:15, ]
+    Condition4DF <- FinalResult[16:20, ]
+    
+    if(removeDiscardedTrials){
+      Condition1DF<- Condition1DF[Condition1DF$timeCal < removeDiscardedTrialsTimeout, ]
+      Condition2DF<- Condition2DF[Condition2DF$timeCal < removeDiscardedTrialsTimeout, ]
+      Condition3DF<- Condition3DF[Condition3DF$timeCal < removeDiscardedTrialsTimeout, ]
+      Condition4DF<- Condition4DF[Condition4DF$timeCal < removeDiscardedTrialsTimeout, ]
+    }
+
+    condition1Result_Accuracy <- mean(Condition1DF$AccuracyResult)
+    condition2Result_Accuracy <- mean(Condition2DF$AccuracyResult)
+    condition3Result_Accuracy <- mean(Condition3DF$AccuracyResult)
+    condition4Result_Accuracy <- mean(Condition4DF$AccuracyResult)
+    
+    condition1Result_EuclError <- mean(Condition1DF$EuclErrorResult)
+    condition2Result_EuclError <- mean(Condition2DF$EuclErrorResult)
+    condition3Result_EuclError <- mean(Condition3DF$EuclErrorResult)
+    condition4Result_EuclError <- mean(Condition4DF$EuclErrorResult)
+    
+    if(par %% 4 == 1){
+      AccuracyDF <- AccuracyDF %>%
+        mutate(Accuracy = replace(Accuracy, Participant == par & Furniture == "Has Furniture" & Layout == "Regular", condition1Result_Accuracy))
+      AccuracyDF <- AccuracyDF %>%
+        mutate(Accuracy = replace(Accuracy, Participant == par & Furniture == "No Furniture" & Layout == "Regular", condition2Result_Accuracy))
+      AccuracyDF <- AccuracyDF %>%
+        mutate(Accuracy = replace(Accuracy, Participant == par & Furniture == "Has Furniture" & Layout == "Irregular", condition3Result_Accuracy))
+      AccuracyDF <- AccuracyDF %>%
+        mutate(Accuracy = replace(Accuracy, Participant == par & Furniture == "No Furniture" & Layout == "Irregular", condition4Result_Accuracy))
+      
+      AccuracyDF <- AccuracyDF %>%
+        mutate(EuclideanError = replace(EuclideanError, Participant == par & Furniture == "Has Furniture" & Layout == "Regular", condition1Result_EuclError))
+      AccuracyDF <- AccuracyDF %>%
+        mutate(EuclideanError = replace(EuclideanError, Participant == par & Furniture == "No Furniture" & Layout == "Regular", condition2Result_EuclError))
+      AccuracyDF <- AccuracyDF %>%
+        mutate(EuclideanError = replace(EuclideanError, Participant == par & Furniture == "Has Furniture" & Layout == "Irregular", condition3Result_EuclError))
+      AccuracyDF <- AccuracyDF %>%
+        mutate(EuclideanError = replace(EuclideanError, Participant == par & Furniture == "No Furniture" & Layout == "Irregular", condition4Result_EuclError))
+    }else if(par %% 4 == 2){
+      AccuracyDF <- AccuracyDF %>%
+        mutate(Accuracy = replace(Accuracy, Participant == par & Furniture == "No Furniture" & Layout == "Regular", condition1Result_Accuracy))
+      AccuracyDF <- AccuracyDF %>%
+        mutate(Accuracy = replace(Accuracy, Participant == par & Furniture == "No Furniture" & Layout == "Irregular", condition2Result_Accuracy))
+      AccuracyDF <- AccuracyDF %>%
+        mutate(Accuracy = replace(Accuracy, Participant == par & Furniture == "Has Furniture" & Layout == "Regular", condition3Result_Accuracy))
+      AccuracyDF <- AccuracyDF %>%
+        mutate(Accuracy = replace(Accuracy, Participant == par & Furniture == "Has Furniture" & Layout == "Irregular", condition4Result_Accuracy))
+      
+      AccuracyDF <- AccuracyDF %>%
+        mutate(EuclideanError = replace(EuclideanError, Participant == par & Furniture == "No Furniture" & Layout == "Regular", condition1Result_EuclError))
+      AccuracyDF <- AccuracyDF %>%
+        mutate(EuclideanError = replace(EuclideanError, Participant == par & Furniture == "No Furniture" & Layout == "Irregular", condition2Result_EuclError))
+      AccuracyDF <- AccuracyDF %>%
+        mutate(EuclideanError = replace(EuclideanError, Participant == par & Furniture == "Has Furniture" & Layout == "Regular", condition3Result_EuclError))
+      AccuracyDF <- AccuracyDF %>%
+        mutate(EuclideanError = replace(EuclideanError, Participant == par & Furniture == "Has Furniture" & Layout == "Irregular", condition4Result_EuclError))
+    }
+    else if(par %% 4 == 3){
+      AccuracyDF <- AccuracyDF %>%
+        mutate(Accuracy = replace(Accuracy, Participant == par & Furniture == "Has Furniture" & Layout == "Irregular", condition1Result_Accuracy))
+      AccuracyDF <- AccuracyDF %>%
+        mutate(Accuracy = replace(Accuracy, Participant == par & Furniture == "Has Furniture" & Layout == "Regular", condition2Result_Accuracy))
+      AccuracyDF <- AccuracyDF %>%
+        mutate(Accuracy = replace(Accuracy, Participant == par & Furniture == "No Furniture" & Layout == "Irregular", condition3Result_Accuracy))
+      AccuracyDF <- AccuracyDF %>%
+        mutate(Accuracy = replace(Accuracy, Participant == par & Furniture == "No Furniture" & Layout == "Regular", condition4Result_Accuracy))
+      
+      AccuracyDF <- AccuracyDF %>%
+        mutate(EuclideanError = replace(EuclideanError, Participant == par & Furniture == "Has Furniture" & Layout == "Irregular", condition1Result_EuclError))
+      AccuracyDF <- AccuracyDF %>%
+        mutate(EuclideanError = replace(EuclideanError, Participant == par & Furniture == "Has Furniture" & Layout == "Regular", condition2Result_EuclError))
+      AccuracyDF <- AccuracyDF %>%
+        mutate(EuclideanError = replace(EuclideanError, Participant == par & Furniture == "No Furniture" & Layout == "Irregular", condition3Result_EuclError))
+      AccuracyDF <- AccuracyDF %>%
+        mutate(EuclideanError = replace(EuclideanError, Participant == par & Furniture == "No Furniture" & Layout == "Regular", condition4Result_EuclError))
+    }
+    else if(par %% 4 == 0){
+      AccuracyDF <- AccuracyDF %>%
+        mutate(Accuracy = replace(Accuracy, Participant == par & Furniture == "No Furniture" & Layout == "Irregular", condition1Result_Accuracy))
+      AccuracyDF <- AccuracyDF %>%
+        mutate(Accuracy = replace(Accuracy, Participant == par & Furniture == "Has Furniture" & Layout == "Irregular", condition2Result_Accuracy))
+      AccuracyDF <- AccuracyDF %>%
+        mutate(Accuracy = replace(Accuracy, Participant == par & Furniture == "No Furniture" & Layout == "Regular", condition3Result_Accuracy))
+      AccuracyDF <- AccuracyDF %>%
+        mutate(Accuracy = replace(Accuracy, Participant == par & Furniture == "Has Furniture" & Layout == "Regular", condition4Result_Accuracy))
+      
+      AccuracyDF <- AccuracyDF %>%
+        mutate(EuclideanError = replace(EuclideanError, Participant == par & Furniture == "No Furniture" & Layout == "Irregular", condition1Result_EuclError))
+      AccuracyDF <- AccuracyDF %>%
+        mutate(EuclideanError = replace(EuclideanError, Participant == par & Furniture == "Has Furniture" & Layout == "Irregular", condition2Result_EuclError))
+      AccuracyDF <- AccuracyDF %>%
+        mutate(EuclideanError = replace(EuclideanError, Participant == par & Furniture == "No Furniture" & Layout == "Regular", condition3Result_EuclError))
+      AccuracyDF <- AccuracyDF %>%
+        mutate(EuclideanError = replace(EuclideanError, Participant == par & Furniture == "Has Furniture" & Layout == "Regular", condition4Result_EuclError))
+    }
+  }
+}
+
+## remove non-participated rows
+finishedDF <- filter(AccuracyDF, AccuracyDF$Accuracy != 0)
+
+femaleDF <- filter(finishedDF, finishedDF$Participant <= 8)
+maleDF <- filter(finishedDF, finishedDF$Participant > 8)
+##### data Analysis ####
+
+
+finishedDF %>%
+  group_by(Furniture) %>%
+  summarise(avg= mean(Accuracy))
+
+finishedDF %>%
+  group_by(Layout) %>%
+  summarise(avg= mean(Accuracy))
+
+finishedDF %>%
+  group_by(Furniture) %>%
+  summarise(avg= mean(EuclideanError))
+
+finishedDF %>%
+  group_by(Layout) %>%
+  summarise(avg= mean(EuclideanError))
+
+### two-way ANOVA
+res.aov_Accuracy <- aov(Accuracy ~ Layout + Furniture, data = finishedDF)
+summary(res.aov_Accuracy)
+effectsize(res.aov_Accuracy)
+
+res.aov_EuclError <- aov(EuclideanError ~ Layout + Furniture, data = finishedDF)
+summary(res.aov_EuclError)
+effectsize(res.aov_EuclError)
+
+
+### interaction efect
+res.aov_Accuracy_Interaction <- aov(Accuracy ~ Layout * Furniture, data = finishedDF)
+summary(res.aov_Accuracy_Interaction)
+res.aov_EuclError_Interaction <- aov(EuclideanError ~ Layout * Furniture, data = finishedDF)
+summary(res.aov_EuclError_Interaction)
+
+
+### each condition as repeated-Measure ANOVA
+modelAccuracy <- aov(Accuracy~factor(Condition)+Error(factor(Participant)), data = finishedDF)
+effectsize(modelAccuracy)
+modelEucliError <- aov(EuclideanError~factor(Condition)+Error(factor(Participant)), data = finishedDF)
+effectsize(modelEucliError)
+
+summary(modelAccuracy)
+summary(modelEucliError)
+
+### gender analysis
+# male
+modelAccuracy_Male <- aov(Accuracy~factor(Condition)+Error(factor(Participant)), data = maleDF)
+effectsize(modelAccuracy_Male)
+modelEucliError_Male <- aov(EuclideanError~factor(Condition)+Error(factor(Participant)), data = maleDF)
+effectsize(modelEucliError_Male)
+
+summary(modelAccuracy_Male)
+summary(modelEucliError_Male)
+
+# female
+modelAccuracy_Female <- aov(Accuracy~factor(Condition)+Error(factor(Participant)), data = femaleDF)
+effectsize(modelAccuracy_Female)
+modelEucliError_Female <- aov(EuclideanError~factor(Condition)+Error(factor(Participant)), data = femaleDF)
+effectsize(modelEucliError_Female)
+
+summary(modelAccuracy_Female)
+summary(modelEucliError_Female)
+
+####### plot #####
+### General plot ###
+dfplotAccuracy <- data_summary(finishedDF, varname="Accuracy", 
+                    groupnames="Condition")
+pAccuracy <- ggplot(dfplotAccuracy, aes(x=Condition, y=Accuracy, fill=Condition)) + 
+  geom_bar(stat="identity", color="black", size = 1, position=position_dodge(), width=.7) +
+  geom_errorbar(aes(ymin=Accuracy-se, ymax=Accuracy+se), width=.2,
+                position=position_dodge(.7), size = 1) + theme_minimal()
+pAccuracy + theme(legend.position='none')+ theme(axis.text=element_text(size=12), axis.title=element_text(size=14)) + labs(y="Accuracy")
+
+
+dfplotEucError <- data_summary(finishedDF, varname="EuclideanError", 
+                               groupnames="Condition")
+pEucError <- ggplot(dfplotEucError, aes(x=Condition, y=EuclideanError, fill=Condition)) + 
+  geom_bar(stat="identity", color="black", size = 1, position=position_dodge(), width=.7) +
+  geom_errorbar(aes(ymin=EuclideanError-se, ymax=EuclideanError+se), width=.2,
+                position=position_dodge(.7), size = 1) + theme_minimal()
+pEucError + theme(legend.position='none')+ theme(axis.text=element_text(size=12), axis.title=element_text(size=14)) + labs(y="Euclidean Error")
+
+
+### Male plot ###
+dfplotAccuracy_Male <- data_summary(maleDF, varname="Accuracy", 
+                               groupnames="Condition")
+pAccuracy_Male <- ggplot(dfplotAccuracy_Male, aes(x=Condition, y=Accuracy, fill=Condition)) + 
+  geom_bar(stat="identity", color="black", size = 1, position=position_dodge(), width=.7) +
+  geom_errorbar(aes(ymin=Accuracy-se, ymax=Accuracy+se), width=.2,
+                position=position_dodge(.7), size = 1) + theme_minimal()
+pAccuracy_Male + theme(legend.position='none')+ theme(axis.text=element_text(size=12), axis.title=element_text(size=14)) + labs(y="Male Accuracy")
+
+
+dfplotEucError_Male <- data_summary(maleDF, varname="EuclideanError", 
+                               groupnames="Condition")
+pEucError_Male <- ggplot(dfplotEucError_Male, aes(x=Condition, y=EuclideanError, fill=Condition)) + 
+  geom_bar(stat="identity", color="black", size = 1, position=position_dodge(), width=.7) +
+  geom_errorbar(aes(ymin=EuclideanError-se, ymax=EuclideanError+se), width=.2,
+                position=position_dodge(.7), size = 1) + theme_minimal()
+pEucError_Male + theme(legend.position='none')+ theme(axis.text=element_text(size=12), axis.title=element_text(size=14)) + labs(y="Male Euclidean Error")
+
+
+### Female plot ###
+dfplotAccuracy_Female <- data_summary(femaleDF, varname="Accuracy", 
+                                    groupnames="Condition")
+pAccuracy_Female <- ggplot(dfplotAccuracy_Female, aes(x=Condition, y=Accuracy, fill=Condition)) + 
+  geom_bar(stat="identity", color="black", size = 1, position=position_dodge(), width=.7) +
+  geom_errorbar(aes(ymin=Accuracy-se, ymax=Accuracy+se), width=.2,
+                position=position_dodge(.7), size = 1) + theme_minimal()
+pAccuracy_Female + theme(legend.position='none')+ theme(axis.text=element_text(size=12), axis.title=element_text(size=14)) + labs(y="Female Accuracy")
+
+
+dfplotEucError_Female <- data_summary(femaleDF, varname="EuclideanError", 
+                                    groupnames="Condition")
+pEucError_Female <- ggplot(dfplotEucError_Female, aes(x=Condition, y=EuclideanError, fill=Condition)) + 
+  geom_bar(stat="identity", color="black", size = 1, position=position_dodge(), width=.7) +
+  geom_errorbar(aes(ymin=EuclideanError-se, ymax=EuclideanError+se), width=.2,
+                position=position_dodge(.7), size = 1) + theme_minimal()
+pEucError_Female + theme(legend.position='none')+ theme(axis.text=element_text(size=12), axis.title=element_text(size=14)) + labs(y="Female Euclidean Error")
+
+### Furniture ###
+dfplotAccuracy_Furniture <- data_summary(finishedDF, varname="Accuracy", 
+                                      groupnames="Furniture")
+pAccuracy_Furniture <- ggplot(dfplotAccuracy_Furniture, aes(x=Furniture, y=Accuracy, fill=Furniture)) + 
+  geom_bar(stat="identity", color="black", size = 1, position=position_dodge(), width=.7) +
+  geom_errorbar(aes(ymin=Accuracy-se, ymax=Accuracy+se), width=.2,
+                position=position_dodge(.7), size = 1) + theme_minimal()
+pAccuracy_Furniture + theme(legend.position='none')+ theme(axis.text=element_text(size=12), axis.title=element_text(size=14)) + labs(y="Accuracy")
+
+dfplotEucError_Furniture <- data_summary(finishedDF, varname="EuclideanError", 
+                                         groupnames="Furniture")
+pEucError_Furniture <- ggplot(dfplotEucError_Furniture, aes(x=Furniture, y=EuclideanError, fill=Furniture)) + 
+  geom_bar(stat="identity", color="black", size = 1, position=position_dodge(), width=.7) +
+  geom_errorbar(aes(ymin=EuclideanError-se, ymax=EuclideanError+se), width=.2,
+                position=position_dodge(.7), size = 1) + theme_minimal()
+pEucError_Furniture + theme(legend.position='none')+ theme(axis.text=element_text(size=12), axis.title=element_text(size=14)) + labs(y="Euclidean Error")
+
+### Layout ###
+dfplotAccuracy_Layout <- data_summary(finishedDF, varname="Accuracy", 
+                                         groupnames="Layout")
+pAccuracy_Layout <- ggplot(dfplotAccuracy_Layout, aes(x=Layout, y=Accuracy, fill=Layout)) + 
+  geom_bar(stat="identity", color="black", size = 1, position=position_dodge(), width=.7) +
+  geom_errorbar(aes(ymin=Accuracy-se, ymax=Accuracy+se), width=.2,
+                position=position_dodge(.7), size = 1) + theme_minimal()
+pAccuracy_Layout + theme(legend.position='none')+ theme(axis.text=element_text(size=12), axis.title=element_text(size=14)) + labs(y="Accuracy")
+
+dfplotEucError_Layout <- data_summary(finishedDF, varname="EuclideanError", 
+                                         groupnames="Layout")
+pEucError_Layout <- ggplot(dfplotEucError_Layout, aes(x=Layout, y=EuclideanError, fill=Layout)) + 
+  geom_bar(stat="identity", color="black", size = 1, position=position_dodge(), width=.7) +
+  geom_errorbar(aes(ymin=EuclideanError-se, ymax=EuclideanError+se), width=.2,
+                position=position_dodge(.7), size = 1) + theme_minimal()
+pEucError_Layout + theme(legend.position='none')+ theme(axis.text=element_text(size=12), axis.title=element_text(size=14)) + labs(y="Euclidean Error")

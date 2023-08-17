@@ -1,0 +1,11 @@
+ParticipantID,TrialNo,TrialID,FurnitureCondition,AlignmentCondition,AnswerAccuracy
+9,2,1,HasFurniture,Regular,4
+9,3,2,HasFurniture,Regular,5
+9,4,3,HasFurniture,Regular,3
+9,5,4,HasFurniture,Regular,3
+9,6,5,HasFurniture,Regular,1
+9,8,6,NoFurniture,Regular,3
+9,9,7,NoFurniture,Regular,5
+9,10,8,NoFurniture,Regular,5
+9,11,9,NoFurniture,Regular,4
+9,12,10,NoFurniture,Regular,5

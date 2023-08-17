@@ -1,0 +1,8 @@
+ParticipantID,TrialNo,TrialID,FurnitureCondition,AlignmentCondition,AnswerAccuracy
+16,2,1,NoFurniture,Irregular,5
+16,3,2,NoFurniture,Irregular,5
+16,4,3,NoFurniture,Irregular,5
+16,5,4,NoFurniture,Irregular,4
+16,6,5,NoFurniture,Irregular,4
+16,8,6,HasFurniture,Irregular,5
+16,9,7,HasFurniture,Irregular,5
