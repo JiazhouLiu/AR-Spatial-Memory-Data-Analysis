@@ -295,8 +295,7 @@ for(par in 1:16){
 }
 
 ## remove non-participated rows
-data.accuracy <- filter(AccuracyDF, AccuracyDF$Accuracy != 0)
-data.accuracy <- data.accuracy %>% mutate(Condition = as.factor(Condition), 
+data.accuracy <- AccuracyDF %>% mutate(Condition = as.factor(Condition), 
                                               Furniture = as.factor(Furniture), 
                                               Layout = as.factor(Layout))
 

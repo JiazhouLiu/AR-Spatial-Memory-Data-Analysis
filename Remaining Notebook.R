@@ -1,27 +1,10 @@
+mean.furniture.accuracy <- data.accuracy %>%
+  group_by(Furniture) %>%
+  summarise(avg= mean(Accuracy))
 
-
-### interaction effect
-#res.aov_Accuracy_Interaction <- aov(Accuracy ~ Layout * Furniture, data = finishedDF)
-#summary(res.aov_Accuracy_Interaction)
-
-#res.aov_Accuracy_Interaction <- aov(Accuracy_Modif ~ Layout * Furniture, data = finishedDF)
-#summary(res.aov_Accuracy_Interaction)
-
-#res.aov_EuclError_Interaction <- aov(EuclideanError ~ Layout * Furniture, data = finishedDF)
-#summary(res.aov_EuclError_Interaction)
-
-### each condition as repeated-Measure ANOVA
-modelAccuracy <- aov(Accuracy~factor(Condition)+Error(factor(Participant)), data = finishedDF)
-effectsize(modelAccuracy)
-summary(modelAccuracy)
-
-modelAccuracy_Modif <- aov(Accuracy_Modif~factor(Condition)+Error(factor(Participant)), data = finishedDF)
-effectsize(modelAccuracy_Modif)
-summary(modelAccuracy_Modif)
-
-modelEucliError <- aov(EuclideanError~factor(Condition)+Error(factor(Participant)), data = finishedDF)
-effectsize(modelEucliError)
-summary(modelEucliError)
+mean.layout.accuracy <- data.accuracy %>%
+  group_by(Layout) %>%
+  summarise(avg= mean(Accuracy))
 
 ### gender analysis
 # male
