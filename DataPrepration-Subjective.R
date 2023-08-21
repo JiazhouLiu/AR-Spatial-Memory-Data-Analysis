@@ -25,17 +25,21 @@ dataNF.REG <- formatData(dataNF.REG, "NoFurniture-Regular", "NoFurniture", "Regu
 
 data.subjective <- rbind(dataF.IREG, dataF.REG, dataNF.IRE, dataNF.REG)
 
-data.subjective <- data.subjective %>% mutate(PID= as.factor(PID), 
-                                              Furniture = as.factor(Furniture), 
-                                              Layout = as.factor(Layout))
-
 data.subjective$Mean <- rowMeans(data.subjective[,3:8])
+
+data.subjective <- data.subjective %>% 
+  select(Timestamp, PID, Mental, Physical, Temporal, Performance, Effort, Frustration, Mean, Condition, Furniture, Layout) %>% 
+  mutate(PID= as.factor(PID), 
+         Condition = as.factor(Condition),
+         Furniture = as.factor(Furniture),
+         Layout = as.factor(Layout))
 
 save(data.subjective, file = "data.subjective.Rdata")
 
 
 ############################
 data.rating <- read.csv("ConditionRating_Pivoted.csv")
+colnames(data.rating) <- c("Condition", "PID", "Rating", "Furniture", "Layout")
 data.rating$PID <- as.factor(data.rating$PID)
 data.rating$Furniture <- as.factor(data.rating$Furniture)
 data.rating$Layout <- as.factor(data.rating$Layout)

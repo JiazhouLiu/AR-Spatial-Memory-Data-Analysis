@@ -13,68 +13,81 @@ output:
 ---
 
 # Accuracy Results
-
-## R Libraries and Functions
+We measured Accuracy and Euclidean Error from the experiment. The following R codes will illustrate the details of our quantitative analysis.
+## R Libraries
 ```{r}
 library(ggplot2)
-library(dplyr)
 library(pwr)
 library(Rmisc)
 library(ARTool)
 library(stats)
-
-plotData <- function(m){
-  d <- Rmisc::summarySE(data.subjective, measurevar = m, groupvars = c("Condition"))
-}
-
-data_summary <- function(data, varname, groupnames){
-  require(plyr)
-  summary_func <- function(x, col){
-    c(mean = mean(x[[col]], na.rm=TRUE),
-      sd = sd(x[[col]], na.rm=TRUE), 
-      se = sd(x[[col]], na.rm=TRUE)/sqrt(12),
-      ic = sd(x[[col]], na.rm=TRUE)/sqrt(12) * qt((1-0.05)/2 + .5, 11))
-  }
-  data_sum<-ddply(data, groupnames, .fun=summary_func,
-                  varname)
-  data_sum <- rename(data_sum, c("mean" = varname))
-  return(data_sum)
-}
+library(dplyr)
+library(effectsize)
 ```
 
-## Load cleaned Accuracy data into global environment
-
+## Load raw Accuracy data into global environment
 ```{r}
-load("data.accuracy.Rdata")
-load("data.accuracy.male.Rdata")
-load("data.accuracy.female.Rdata")
+load("data.accuracy.raw.Rdata")
+str(data.accuracy.raw)
+summary(data.accuracy.raw)
 ```
-
-## Test normality in the main dataset
-
+By checking the raw data, we can see all 320 observations (16 participants * 2 Furniture conditions * 2 Layout conditions * 5 repetitions). We have one independent variable (condition), which can be further split into two independent variables (Furniture and Layout). We also have two dependent variables (Accuracy and Euclidean Error). At the end, we have tahe learning time recorded to see if any experiment trials are outliers.
+## Data Wrangling
+### Visualizing Outliers
+```{r}
+boxplot(data.accuracy.raw[,5:6])
+boxplot(data.accuracy.raw$LearningTime)
+```
+From the boxplots, we can see that Accuracy and Euclidean Error data have no outlier, but the Learning Time data have outliers. We will need to exclude those outliers which imply that participant didn't follow the experimental rule in those trials.
+### Finding Outliers based on Learning Time
+```{r}
+Q <- quantile(data.accuracy.raw$LearningTime, probs=c(.25, .75), na.rm = FALSE)
+iqr <- IQR(data.accuracy.raw$LearningTime)
+up <-  Q[2]+1.5*iqr # Upper Range 
+outliers <- subset(data.accuracy.raw, data.accuracy.raw$LearningTime >= up)
+outliers
+```
+We found 19 trials where participants spent more than expected time (> 35.3s) during the learning phase, causing the data not valid. We then remove those 19 trials from the raw data.
+### Eliminating Outliers
+```{r}
+data.accuracy.eliminated <- subset(data.accuracy.raw, data.accuracy.raw$LearningTime < up)
+str(data.accuracy.eliminated)
+summary(data.accuracy.eliminated)
+```
+After removing, we have 301 observations left for further analysis.
+### Aggregate Accuracy Data
+```{r}
+data.accuracy = subset(data.accuracy.eliminated, select = -LearningTime)
+data.accuracy <- data.accuracy %>% group_by(PID, Condition) %>% mutate(Accuracy = mean(Accuracy), EuclideanError = mean(EuclideanError)) %>% ungroup()
+data.accuracy <- distinct(data.accuracy)
+data.accuracy.female <- filter(data.accuracy, as.integer(data.accuracy$PID) <= 8)
+data.accuracy.male  <- filter(data.accuracy, as.integer(data.accuracy$PID) > 8)
+summary(data.accuracy)
+```
+Now, we have the aggregated dataset which contains the mean accuracy and euclidean error for each participant on each condition. Next, we will do some statistical analysis on this dataset.
+### Test normality in the main dataset
 ```{r}
 shapiro.test(data.accuracy$Accuracy) 
-shapiro.test(data.accuracy$Accuracy_Modif) 
 shapiro.test(data.accuracy$EuclideanError) 
 ```
+We can clearly see from the result that p values are all < 0.05, which means that the data of two dependent variables are not normally distributed. So we use ARTools to transform the data for different measurements. Below, we have separate sections for each accuracy measurements: Accuracy and Euclidean Error.
 
-We can clearly see from the result that p values are all < 0.05, which means that the data of three dependent variables are not normally distributed. So we use ARTools to transform the data for different measurements. 
-
-## Normal Accuracy 
+## Normal Accuracy Analysis
 The Normal Accuracy is calculated by the number of correct cards / 5. The correct card is measured if the user selected card matches the exact pattern card.
 ### Data Transformation using ARTools model
 ```{r}
-art.accuracy <- art(Accuracy ~ Furniture * Layout + Error(Participant), data = data.accuracy)
-art.accuracy.condition <- art(Accuracy ~ Condition + Error(Participant), data = data.accuracy)
-art.accuracy.furniture <- art(Accuracy ~ Furniture + Error(Participant), data = data.accuracy)
-art.accuracy.layout <- art(Accuracy ~ Layout + Error(Participant), data = data.accuracy)
+art.accuracy <- art(Accuracy ~ Furniture * Layout + Error(PID), data = data.accuracy)
+art.accuracy.condition <- art(Accuracy ~ Condition + Error(PID), data = data.accuracy)
+art.accuracy.furniture <- art(Accuracy ~ Furniture + Error(PID), data = data.accuracy)
+art.accuracy.layout <- art(Accuracy ~ Layout + Error(PID), data = data.accuracy)
 ```
+Now, we have four sub-models transformed by ARTools from the original data set for normal accuracy.
 ### Analysis of Two Factors combination
 #### Check Homogenity
 ```{r}
 bartlett.test(Accuracy ~ interaction(Furniture, Layout), data = data.accuracy)
 ```
-From the output, it can be seen that the p-value of **0.7818** is not less than the significance level of 0.05. This means that there is no evidence to suggest that the variance in **Accuracy** is statistically significantly different for different **factors or the combination of factors**. Thus, we can assume the homogenity.
+From the output, it can be seen that the p-value of **0.7832** is not less than the significance level of 0.05. This means that there is no evidence to suggest that the variance in **Accuracy** is statistically significantly different among different **factors or the combination of factors**. Thus, we can assume the homogenity.
 
 #### Two-way Repeated measures ANOVA
 ```{r}
@@ -83,13 +96,13 @@ model.accuracy$part.eta.sq = with(model.accuracy, `Sum Sq`/(`Sum Sq` + `Sum Sq.r
 
 model.accuracy
 ```
-**TODO**
+From the two-way repeated measures ANOVA results above, we can see that only furniture has the significant main effect (p < 0.05). The effect size 0.09 is calculated using partial eta-squared, which implies a medium effect (0.06-0.14). 
 ### Analysis of Furniture Factor
 #### Check Homogenity
 ```{r}
 bartlett.test(Accuracy ~ Furniture, data = data.accuracy)
 ```
-From the output, it can be seen that the p-value of **0.5958** is not less than the significance level of 0.05. This means that there is no evidence to suggest that the variance in **Accuracy** is statistically significantly different for different **Furniture conditions**. Thus, we can assume the homogenity.
+From the output, it can be seen that the p-value of **0.3716** is not less than the significance level of 0.05. This means that there is no evidence to suggest that the variance in **Accuracy** is statistically significantly different among different **Furniture conditions**. Thus, we can assume the homogenity.
 
 #### One-way Repeated measures ANOVA
 ```{r}
@@ -98,19 +111,29 @@ model.accuracy.furniture$part.eta.sq = with(model.accuracy.furniture, `Sum Sq`/(
 
 model.accuracy.furniture
 ```
-**TODO**
+From the one-way repeated measures ANOVA results above, we can see that **furniture has the significant main effect (p < 0.05)**. The **effect size 0.09** is calculated using partial eta-squared, which implies a **medium effect (0.06-0.14)**. 
+#### Power Analysis
+```{r}
+k=2
+n=32
+f=eta2_to_f(0.09108)
+sig.level = 0.05
+pwr.anova.test(k, n, f, sig.level)
+```
+A Post-hoc power calculations for balanced ANOVA test was conducted to determine the power of our tested study hypothesis, which compared Furniture to No Furniture conditions. The effect size of the study is 0.09 (partial eta-squared)/0.32 (Cohen's f) with 32 observations in two groups. The calculated power is 0.7.
 #### Visualisation
 ```{r}
 d <- Rmisc::summarySE(data.accuracy, measurevar = "Accuracy", groupvars = c("Furniture"))
-ggplot(d, aes(x = Furniture, y = Accuracy)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Accuracy-ci, ymax=Accuracy+ci))
+d
+ggplot(d, aes(x = Furniture, y = Accuracy, fill = Furniture)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Accuracy-ci, ymax=Accuracy+ci)) + scale_fill_manual(values=c("#66c2a5", "#fc8d62"))
 ```
-**TODO**
+
 ### Analysis of Layout Factor
 #### Check Homogenity
 ```{r}
 bartlett.test(Accuracy ~ Layout, data = data.accuracy)
 ```
-From the output, it can be seen that the p-value of **0.7161** is not less than the significance level of 0.05. This means that there is no evidence to suggest that the variance in **Accuracy** is statistically significantly different for different **Layout conditions**. Thus, we can assume the homogenity. 
+From the output, it can be seen that the p-value of **0.7969** is not less than the significance level of 0.05. This means that there is no evidence to suggest that the variance in **Accuracy** is statistically significantly different among different **Layout conditions**. Thus, we can assume the homogenity. 
 
 #### One-way Repeated measures ANOVA
 ```{r}
@@ -119,19 +142,20 @@ model.accuracy.layout$part.eta.sq = with(model.accuracy.layout, `Sum Sq`/(`Sum S
 
 model.accuracy.layout
 ```
-**TODO**
+From the one-way repeated measures ANOVA results above, we cannot find any significant main effect **for the layout factor (p = 0.15)**.
+
 #### Visualisation
 ```{r}
 d <- Rmisc::summarySE(data.accuracy, measurevar = "Accuracy", groupvars = c("Layout"))
-ggplot(d, aes(x = Layout, y = Accuracy)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Accuracy-ci, ymax=Accuracy+ci))
+d
+ggplot(d, aes(x = Layout, y = Accuracy, fill = Layout)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Accuracy-ci, ymax=Accuracy+ci)) + scale_fill_manual(values=c("#8da0cb", "#e78ac3"))
 ```
-**TODO**
 ### Analysis of Four Conditions
 #### Check Homogenity
 ```{r}
 bartlett.test(Accuracy ~ Condition, data = data.accuracy)
 ```
-From the output, it can be seen that the p-value of **0.8987** is not less than the significance level of 0.05. This means that there is no evidence to suggest that the variance in **accuracy** is statistically significantly different for different **conditions**. Thus, we can assume the homogenity. 
+From the output, it can be seen that the p-value of **0.7832** is not less than the significance level of 0.05. This means that there is no evidence to suggest that the variance in **accuracy** is statistically significantly different among different **conditions**. Thus, we can assume the homogenity. 
 
 #### One-way Repeated measures ANOVA
 ```{r}
@@ -140,628 +164,633 @@ model.accuracy.condition$part.eta.sq = with(model.accuracy.condition, `Sum Sq`/(
 
 model.accuracy.condition
 ```
-**TODO**
-#### Post-hoc analysis
-```{r}
-marginal = art.con(art.accuracy.condition, "Condition")
-marginal
-```
-**TODO**
+From the one-way repeated measures ANOVA results above, we cannot find a strong significant main effect **among the four conditions (p = 0.08)**.
 #### Visualisation
 ```{r}
 d <- Rmisc::summarySE(data.accuracy, measurevar = "Accuracy", groupvars = c("Condition"))
-ggplot(d, aes(x = Condition, y = Accuracy)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Accuracy-ci, ymax=Accuracy+ci))
+ggplot(d, aes(x = Condition, y = Accuracy, fill = Condition)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Accuracy-ci, ymax=Accuracy+ci)) + scale_fill_manual(values=c("#e41a1c", "#377eb8", "#984ea3", "#ff7f00"))
 ```
-**TODO**
-```{r}
-library(pwr)
-k=4
-n=16
-f=0.14899
-sig.level = 0.05
-pwr.anova.test(k, n, f, sig.level)
-```
+## Conclusion for Normal Accuracy (Cards Incorrect)
+The data for the normal accuracy are not normally distributed. So we use the Aligned Rank Transform (ART) to transform our non-parametric data and turn them into ANOVA models. The data meet the assumption of homogeneity of variances. The one-way repeated measures ANOVA test shows a significant effect of the Furniture factor (p=0.035, effect size eta-squared=0.09) with a higher accuracy for Furniture condition (mean=0.57, sd=0.27) vs No Furniture condition (mean=0.50, sd=0.23). We don't find any evidence to suggest that the Layout factor has a main effect. Also, we don't find any evidence to suggest that the four conditions are significantly different. 
 
 
-### Main Take-aways for Normal Accuracy
-**TODO**
 
-## Modified Accuracy
 
-The Modified Accuracy is calculated by the number of correct cards / 5. The correct card is measured if the user selected card matches the exact pattern card in the same column. \### Check Average
 
-```{r}
-mean.furniture.ModifAccuracy <- data.accuracy %>%
-                            group_by(Furniture) %>%
-                            summarise(avg= mean(Accuracy_Modif))
-
-mean.layout.ModifAccuracy <- data.accuracy %>%
-                            group_by(Layout) %>%
-                            summarise(avg= mean(Accuracy_Modif))
-```
-
+## Euclidean Distance Analysis
+The Euclidean Distance provides a secondary evaluation of the error measure. Whereas Cards Incorrect provides an absolute measure, Euclidean Distance rewards card selections by summing the distance from the selected cards to the correct ones via the Hungarian Algorithm. 
 ### Data Transformation using ARTools model
-
 ```{r}
-art.accuracy <- art(Accuracy ~ Furniture * Layout + Error(Participant), data = data.accuracy)
-art.accuracy.furniture <- art(Accuracy ~ Furniture + Error(Participant), data = data.accuracy)
-art.accuracy.layout <- art(Accuracy ~ Layout + Error(Participant), data = data.accuracy)
+art.ee <- art(EuclideanError ~ Furniture * Layout + Error(PID), data = data.accuracy)
+art.ee.furniture <- art(EuclideanError ~ Furniture + Error(PID), data = data.accuracy)
+art.ee.layout <- art(EuclideanError ~ Layout + Error(PID), data = data.accuracy)
+art.ee.condition <- art(EuclideanError ~ Condition + Error(PID), data = data.accuracy)
+```
+Now, we have four sub-models transformed by ARTools from the original data set for Euclidean Distance.
+### Analysis of Two Factors combination
+#### Check Homogenity
+```{r}
+bartlett.test(EuclideanError ~ interaction(Furniture, Layout), data = data.accuracy)
+```
+From the output, it can be seen that the p-value of **0.2891** is not less than the significance level of 0.05. This means that there is no evidence to suggest that the variance in **Euclidean Distance** is statistically significantly different among different **factors or the combination of factors**. Thus, we can assume the homogenity.
+
+#### Two-way Repeated measures ANOVA
+```{r}
+model.ee <- anova(art.ee)
+model.ee$part.eta.sq = with(model.ee, `Sum Sq`/(`Sum Sq` + `Sum Sq.res`))
+
+model.ee
+```
+From the two-way repeated measures ANOVA results above, we cannot find any evidence to suggest a significant difference for any factors or combinations of factors. 
+### Analysis of Furniture Factor
+#### Check Homogenity
+```{r}
+bartlett.test(EuclideanError ~ Furniture, data = data.accuracy)
+```
+From the output, it can be seen that the p-value of **0.09254** is not less than the significance level of 0.05. This means that there is no evidence to suggest that the variance in **Euclidean Distance** is statistically significantly different among different **Furniture conditions**. Thus, we can assume the homogenity.
+
+#### One-way Repeated measures ANOVA
+```{r}
+model.ee.furniture <- anova(art.ee.furniture)
+model.ee.furniture$part.eta.sq = with(model.ee.furniture, `Sum Sq`/(`Sum Sq` + `Sum Sq.res`))
+
+model.ee.furniture
+```
+From the one-way repeated measures ANOVA results above, we cannot find any significant main effect **for the Furniture factor (p = 0.17)**.
+
+#### Visualisation
+```{r}
+d <- Rmisc::summarySE(data.accuracy, measurevar = "EuclideanError", groupvars = c("Furniture"))
+d
+ggplot(d, aes(x = Furniture, y = EuclideanError, fill = Furniture)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=EuclideanError-ci, ymax=EuclideanError+ci)) + scale_fill_manual(values=c("#66c2a5", "#fc8d62"))
 ```
 
-### Two-way ANOVA
-
+### Analysis of Layout Factor
+#### Check Homogenity
 ```{r}
-model.accuracy  <- anova(art.accuracy)
-model.accuracy 
+bartlett.test(EuclideanError ~ Layout, data = data.accuracy)
 ```
+From the output, it can be seen that the p-value of **0.5078** is not less than the significance level of 0.05. This means that there is no evidence to suggest that the variance in **Euclidean Distance** is statistically significantly different among different **Layout conditions**. Thus, we can assume the homogenity. 
 
-From the output, it can be seen that we have significant main effects of Furniture (p \< 0.05). \### Effect Size
-
+#### One-way Repeated measures ANOVA
 ```{r}
-eta_squared(model.accuracy)
+model.ee.layout<- anova(art.ee.layout)
+model.ee.layout$part.eta.sq = with(model.ee.layout, `Sum Sq`/(`Sum Sq` + `Sum Sq.res`))
+
+model.ee.layout
 ```
+From the one-way repeated measures ANOVA results above, we cannot find any significant main effect **for the layout factor (p = 0.94)**.
 
-## Euclidean Error
-
-The Euclidean Error is calculated by the optimised distance (via Hungarian Algorithm) between the user selected cards and the pattern cards. \### Check Average
-
+#### Visualisation
 ```{r}
-mean.furniture.euclidean <- data.accuracy %>%
-                            group_by(Furniture) %>%
-                            summarise(avg= mean(EuclideanError))
-
-mean.layout.euclidean <- data.accuracy %>%
-                            group_by(Layout) %>%
-                            summarise(avg= mean(EuclideanError))
+d <- Rmisc::summarySE(data.accuracy, measurevar = "EuclideanError", groupvars = c("Layout"))
+d
+ggplot(d, aes(x = Layout, y = EuclideanError, fill = Layout)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=EuclideanError-ci, ymax=EuclideanError+ci)) + scale_fill_manual(values=c("#8da0cb", "#e78ac3"))
 ```
-
-### Data Transformation using ARTools model
-
+### Analysis of Four Conditions
+#### Check Homogenity
 ```{r}
-art.accuracy <- art(Accuracy ~ Furniture * Layout + Error(Participant), data = data.accuracy)
-art.accuracy.furniture <- art(Accuracy ~ Furniture + Error(Participant), data = data.accuracy)
-art.accuracy.layout <- art(Accuracy ~ Layout + Error(Participant), data = data.accuracy)
+bartlett.test(EuclideanError ~ Condition, data = data.accuracy)
 ```
+From the output, it can be seen that the p-value of **0.2891** is not less than the significance level of 0.05. This means that there is no evidence to suggest that the variance in **Euclidean Distance** is statistically significantly different among different **conditions**. Thus, we can assume the homogenity. 
 
-### Two-way ANOVA
-
+#### One-way Repeated measures ANOVA
 ```{r}
-model.accuracy  <- anova(art.accuracy)
-model.accuracy 
+model.ee.condition <- anova(art.ee.condition)
+model.ee.condition$part.eta.sq = with(model.ee.condition, `Sum Sq`/(`Sum Sq` + `Sum Sq.res`))
+
+model.ee.condition
 ```
-
-From the output, it can be seen that we have significant main effects of Furniture (p \< 0.05). \### Effect Size
-
+From the one-way repeated measures ANOVA results above, we cannot find a strong significant main effect **among the four conditions (p = 0.58)**.
+#### Visualisation
 ```{r}
-eta_squared(model.accuracy)
+d <- Rmisc::summarySE(data.accuracy, measurevar = "EuclideanError", groupvars = c("Condition"))
+ggplot(d, aes(x = Condition, y = EuclideanError, fill = Condition)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=EuclideanError-ci, ymax=EuclideanError+ci)) + scale_fill_manual(values=c("#e41a1c", "#377eb8", "#984ea3", "#ff7f00"))
 ```
+## Conclusion for Euclidean Distance
+The data for the Euclidean Distance are not normally distributed. So we use the Aligned Rank Transform (ART) to transform our non-parametric data and turn them into ANOVA models. The data meet the assumption of homogeneity of variances. Our results show that there is no evidence to suggest that Euclidean Distance measure is significant difference for any factor or combination of factors. 
+
 
 # NASA-TLX Results
 
-## R Libraries and Functions
-
+## R Libraries
 ```{r}
 library(tidyverse)
 library(Rmisc)
 library(ARTool)
 library(stats)
-library(effectsize)
-
-plotData <- function(m){
-  d <- Rmisc::summarySE(data.subjective, measurevar = m, groupvars = c("Condition"))
-}
+library(dplyr)
+library(rstatix)
+library(coin)
 ```
 
 ## Load cleaned subjective data into global environment
-
 ```{r}
 load("data.subjective.Rdata")
+summary(data.subjective)
 ```
+Because we have six dimensions (Mental, Physical, Temporal, Performance, Effort, Frustration) and the mean value from the NASA-TLX questionnaire. We separate them into different sections to analyse.
 
 ## Mental Demands
 
 ### Check Normality
-
 ```{r}
 shapiro.test(data.subjective$Mental)
 ```
-
-p \< 0.01, NASA-TLX Mental Demands data are not normally distributed. So we use ARTools to transform the data.
-
+p < 0.01, NASA-TLX Mental Demands data are not normally distributed. So we use ARTools to transform the data for multi-factor analysis. And then we use Friedman tests for single factor analysis.
 ```{r}
 art.m.both <- art(Mental ~ Furniture * Layout + Error(PID), data = data.subjective)
-art.m.furniture <- art(Mental ~ Furniture + Error(PID), data = data.subjective)
-art.m.layout <- art(Mental ~ Layout + Error(PID), data = data.subjective)
 ```
 
 ### Analyse Mental Demands on the combination of two factors
+We first check the homogenity using bartlett's test.
 
-Then, we use two-way ANOVA to analyse the transformed data. We first check the homogenity using bartlett's test. \#### Check Homogenity
-
+#### Check Homogenity
 ```{r}
 bartlett.test(Mental ~ interaction(Furniture,Layout), data = data.subjective)
 ```
 
-From the output, it can be seen that the p-value of 0.9947 is not less than the significance level of 0.05. This means that there is no evidence to suggest that the variance in mental demands is statistically significantly different for different factors or the combination of factors. Thus, we can assume the homogenity. \#### Two-way ANOVA
+From the output, it can be seen that the p-value of **0.9947** is not less than the significance level of 0.05. This means that there is no evidence to suggest that the variance in **mental demands** is statistically significantly different **among different factors or the combination of factors.** Thus, we can assume the homogenity.
 
+#### Two-way ANOVA
 ```{r}
 model.m.both <- anova(art.m.both)
+model.m.both$part.eta.sq = with(model.m.both, `Sum Sq`/(`Sum Sq` + `Sum Sq.res`))
+
 model.m.both
 ```
 
-From the output, it can be seen that we have significant main effects of Furniture (p \< 0.05). \#### Effect Size
+From the output, it can be seen that we have significant main effects of Furniture (p < 0.05) with an effect size partial eta-squared 0.29. The effect size can be interpreted as a large effect (eta-squared >= 0.14).
+
+### Addtional Analyse for Mental Demands on the Furniture Factor using Friedman's test
+Then, we use Friedman's test to analyse the furniture factor.
+```{r}
+data.mental.furniture <- data.subjective %>% dplyr::group_by(PID, Furniture) %>% dplyr::summarise(Mental = mean(Mental), .groups = "drop")
+friedman.test(y=data.mental.furniture$Mental, groups=data.mental.furniture$Furniture, blocks=data.mental.furniture$PID)
+```
+A Friedman's test revealed a significant effect of Furniture factor on Mental Demands (chi-squared = 5.3, p < 0.05).
+```{r}
+data.mental.furniture <- as.data.frame(data.mental.furniture)
+data.mental.furniture %>% friedman_effsize(Mental ~ Furniture | PID)
+```
+The effect size (Kendall's W) for Furniture is 0.33. It implies a moderate effect size.
+
+### Addtional Analyse for Mental Demands on the Layout Factor using Friedman's test
+Then, we use Friedman's test to analyse the layout factor.
 
 ```{r}
-eta_squared(model.m.both)
+data.mental.layout <- data.subjective %>% dplyr::group_by(PID, Layout) %>% dplyr::summarise(Mental = mean(Mental), .groups = "drop")
+friedman.test(y=data.mental.layout$Mental, groups=data.mental.layout$Layout, blocks=data.mental.layout$PID)
 ```
+From the output, it can be seen that the p value is 0.76 which is more than 0.05. It means that there is no evidence to suggest that the mental demands is statistically significantly different among different layouts.
 
-The effect size (eta-squared) for Furniture is 0.29.
-
-### Analyse Mental Demands on the Furniture Factor
-
-Then, we use one-way ANOVA to analyse the transformed data on the furniture factor. \#### One-way ANOVA Test
+### Addtional Analyse for Mental Demands on the four conditions using Friedman's test
+Then, we use Friedman's test to analyse the four conditions.
+```{r}
+data.mental.condition <- data.subjective %>% dplyr::group_by(PID, Condition) %>% dplyr::summarise(Mental = mean(Mental), .groups = "drop")
+friedman.test(y=data.mental.condition$Mental, groups=data.mental.condition$Condition, blocks=data.mental.condition$PID)
+```
+A Friedman's test revealed a significant effect of four conditions on Mental Demands (chi-squared = 11.8, p < 0.01).
 
 ```{r}
-model.m.furniture <- anova(art.m.furniture)
-model.m.furniture
+data.mental.condition <- as.data.frame(data.mental.condition)
+data.mental.condition %>% friedman_effsize(Mental ~ Condition | PID)
 ```
-
-From the output, it can be seen that we have significant effects of Furniture factor (p \< 0.01). \#### Effect Size
+The effect size (Kendall's W) is 0.25. It implies a small effect size.
 
 ```{r}
-eta_squared(model.m.furniture)
+pairwise.wilcox.test(data.mental.condition$Mental, data.mental.condition$Condition, p.adj="bonferroni", exact=F, paired=T)
+
+wilcox_test(Mental ~ factor(Condition), data=data.mental.condition[data.mental.condition$Condition=="Furniture-Regular"|data.mental.condition$Condition=="NoFurniture-Irregular",], distribution="exact")
+1.951 / sqrt(32)
 ```
+A post-hoc test using Wilcoxon tests with Bonferroni correction showed the significant differences between Condition "Furniture-Regular" and "NoFurniture-Irregular" (p < 0.05, r = 0.34).
 
-The effect size (eta-squared) for Furniture is 0.27.
-
-### Analyse Mental Demands on the Layout Factor
-
-Then, we use one-way ANOVA to analyse the transformed data on the layout factor. \#### One-way ANOVA Test
-
-```{r}
-model.m.layout <- anova(art.m.layout)
-model.m.layout
-```
-
-From the output, it can be seen that the p value is 0.6 which is more than 0.05. It means that there is no evidence to suggest that the mental demands is statistically significantly different for different layouts.
-
-### Visualisation
-
-```{r}
-d <- Rmisc::summarySE(data.subjective, measurevar = "Mental", groupvars = c("Condition"))
-ggplot(d, aes(x = Condition, y = Mental)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Mental-ci, ymax=Mental+ci))
-```
 
 ## Physical Demands
-
 ### Check Normality
-
 ```{r}
 shapiro.test(data.subjective$Physical)
 ```
-
-p \< 0.01, NASA-TLX Physical Demands data are not normally distributed. So we use ARTools to transform the data.
-
+p < 0.01, NASA-TLX **Physical Demands** data are not normally distributed. So we use **ARTools to transform the data** for multi-factor analysis. And then we use **Friedman tests** for single factor analysis.
 ```{r}
 art.p.both <- art(Physical ~ Furniture * Layout + Error(PID), data = data.subjective)
-art.p.furniture <- art(Physical ~ Furniture + Error(PID), data = data.subjective)
-art.p.layout <- art(Physical ~ Layout + Error(PID), data = data.subjective)
 ```
 
 ### Analyse Physical Demands on the combination of two factors
+We first check the homogenity using bartlett's test.
 
-Then, we use two-way ANOVA to analyse the transformed data. We first check the homogenity using bartlett's test. \#### Check Homogenity
-
+#### Check Homogenity
 ```{r}
 bartlett.test(Physical ~ interaction(Furniture,Layout), data = data.subjective)
 ```
 
-From the output, it can be seen that the p-value of 0.9564 is not less than the significance level of 0.05. This means that there is no evidence to suggest that the variance in physical demands is statistically significantly different for different factors or the combination of factors. Thus, we can assume the homogenity. \#### Two-way ANOVA
+From the output, it can be seen that the p-value of **0.9564** is not less than the significance level of 0.05. This means that there is no evidence to suggest that the variance in **Physical demands** is statistically significantly different among different factors or the combination of factors. Thus, we can assume the homogenity.
 
+#### Two-way ANOVA
 ```{r}
 model.p.both <- anova(art.p.both)
+model.p.both$part.eta.sq = with(model.p.both, `Sum Sq`/(`Sum Sq` + `Sum Sq.res`))
 model.p.both
 ```
+From the output, it can be seen that we have significant main effects of Furniture (p < 0.05) with an effect size partial eta-squared 0.1. The effect size can be interpreted as a medium effect (0.06 - 0.14).
 
-From the output, it can be seen that we have significant main effects of Furniture (p \< 0.05). \#### Effect Size
+### Addtional Analyse for Physical Demands on the Furniture Factor using Friedman's test
+Then, we use Friedman's test to analyse the furniture factor.
+```{r}
+data.physical.furniture <- data.subjective %>% dplyr::group_by(PID, Furniture) %>% dplyr::summarise(Physical = mean(Physical), .groups = "drop")
+friedman.test(y=data.physical.furniture$Physical, groups=data.physical.furniture$Furniture, blocks=data.physical.furniture$PID)
+```
+A Friedman's test revealed a significant effect of Furniture factor on Physical Demands (chi-squared = 5.3, p < 0.01).
+```{r}
+data.physical.furniture <- as.data.frame(data.physical.furniture)
+data.physical.furniture %>% friedman_effsize(Physical ~ Furniture | PID)
+```
+The effect size (Kendall's W) for Furniture is 0.46. It implies a moderate effect size.
+
+### Addtional Analyse for Physical Demands on the Layout Factor using Friedman's test
+Then, we use Friedman's test to analyse the layout factor.
 
 ```{r}
-eta_squared(model.p.both)
+data.physical.layout <- data.subjective %>% dplyr::group_by(PID, Layout) %>% dplyr::summarise(Physical = mean(Physical), .groups = "drop")
+friedman.test(y=data.physical.layout$Physical, groups=data.physical.layout$Layout, blocks=data.physical.layout$PID)
 ```
+From the output, it can be seen that the p value is 0.4 which is more than 0.05. It means that there is no evidence to suggest that the physical demands is statistically significantly different among different layouts.
 
-The effect size (eta-squared) for Furniture is 0.1.
-
-### Analyse Physical Demands on the Furniture Factor
-
-Then, we use one-way ANOVA to analyse the transformed data on the furniture factor. \#### One-way ANOVA Test
+### Addtional Analyse for Physical Demands on the four conditions using Friedman's test
+Then, we use Friedman's test to analyse the four conditions.
+```{r}
+data.physical.condition <- data.subjective %>% dplyr::group_by(PID, Condition) %>% dplyr::summarise(Physical = mean(Physical), .groups = "drop")
+friedman.test(y=data.physical.condition$Physical, groups=data.physical.condition$Condition, blocks=data.physical.condition$PID)
+```
+A Friedman's test revealed a significant effect of four conditions on Physical Demands (chi-squared = 10.2, p < 0.05).
 
 ```{r}
-model.p.furniture <- anova(art.p.furniture)
-model.p.furniture
+data.physical.condition <- as.data.frame(data.physical.condition)
+data.physical.condition %>% friedman_effsize(Physical ~ Condition | PID)
 ```
+The effect size (Kendall's W) is 0.21. It implies a small effect size.
 
-From the output, it can be seen that we have significant effects of Furniture factor (p \< 0.05). \#### Effect Size
 
 ```{r}
-eta_squared(model.p.furniture)
+pairwise.wilcox.test(data.physical.condition$Physical, data.physical.condition$Condition, p.adj="bonferroni", exact=F, paired=T)
+
+wilcox_test(Physical ~ factor(Condition), data=data.physical.condition[data.physical.condition$Condition=="Furniture-Regular"|data.physical.condition$Condition=="NoFurniture-Irregular",], distribution="exact")
+1.7983 / sqrt(32)
 ```
+A post-hoc test using Wilcoxon tests with Bonferroni correction showed the significant differences between Condition "Furniture-Regular" and "NoFurniture-Irregular" (p < 0.05, r = 0.32).
 
-The effect size (eta-squared) for Furniture is 0.11.
 
-### Analyse Physical Demands on the Layout Factor
 
-Then, we use one-way ANOVA to analyse the transformed data on the layout factor. \#### One-way ANOVA Test
-
-```{r}
-model.p.layout <- anova(art.p.layout)
-model.p.layout
-```
-
-From the output, it can be seen that the p value is 0.055 which is more than 0.05. It means that there is weak evidence to suggest that the Physical demands is statistically significantly different for different layouts. We will not report the layout here as significant difference.
-
-### Visualisation
-
-```{r}
-d <- Rmisc::summarySE(data.subjective, measurevar = "Physical", groupvars = c("Condition"))
-ggplot(d, aes(x = Condition, y = Physical)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Physical-ci, ymax=Physical+ci))
-```
 
 ## Temporal Demands
-
 ### Check Normality
-
 ```{r}
 shapiro.test(data.subjective$Temporal)
 ```
-
-p \< 0.01, NASA-TLX Temporal Demands data are not normally distributed. So we use ARTools to transform the data.
-
+p < 0.01, NASA-TLX Temporal Demands data are not normally distributed. So we use ARTools to transform the data for multi-factor analysis. And then we use Friedman tests for single factor analysis.
 ```{r}
 art.t.both <- art(Temporal ~ Furniture * Layout + Error(PID), data = data.subjective)
-art.t.furniture <- art(Temporal ~ Furniture + Error(PID), data = data.subjective)
-art.t.layout <- art(Temporal ~ Layout + Error(PID), data = data.subjective)
 ```
 
 ### Analyse Temporal Demands on the combination of two factors
+We first check the homogenity using Bartlett's test.
 
-Then, we use two-way ANOVA to analyse the transformed data. We first check the homogenity using bartlett's test. \#### Check Homogenity
-
+#### Check Homogenity
 ```{r}
 bartlett.test(Temporal ~ interaction(Furniture,Layout), data = data.subjective)
 ```
 
-From the output, it can be seen that the p-value of 0.9454 is not less than the significance level of 0.05. This means that there is no evidence to suggest that the variance in temporal demands is statistically significantly different for different factors or the combination of factors. Thus, we can assume the homogenity. \#### Two-way ANOVA
+From the output, it can be seen that the p-value of **0.9454** is not less than the significance level of 0.05. This means that there is no evidence to suggest that the variance in **Temporal demands** is statistically significantly different **among different factors or the combination of factors.** Thus, we can assume the homogenity.
 
+#### Two-way ANOVA
 ```{r}
 model.t.both <- anova(art.t.both)
+model.t.both$part.eta.sq = with(model.t.both, `Sum Sq`/(`Sum Sq` + `Sum Sq.res`))
+
 model.t.both
 ```
 
-From the output, it can be seen that the p values are more than 0.05. It means that there is no evidence to suggest that the Temporal demands is statistically significantly different for different conditions or combinations of conditions.
+From the output, it can be seen that we cannot find any evidence to suggest that the variance in Temporal demands is statistically significantly different among the factors or combination of the factors. 
 
-### Analyse Temporal Demands on the Furniture Factor
+### Addtional Analyse for Temporal Demands on the Furniture Factor using Friedman's test
+Then, we use Friedman's test to analyse the furniture factor.
+```{r}
+data.temporal.furniture <- data.subjective %>% dplyr::group_by(PID, Furniture) %>% dplyr::summarise(Temporal = mean(Temporal), .groups = "drop")
+friedman.test(y=data.temporal.furniture$Temporal, groups=data.temporal.furniture$Furniture, blocks=data.temporal.furniture$PID)
+```
+A Friedman's test revealed no significant effect of Furniture factor on Temporal Demands (chi-squared = 1.6, p = 0.2).
 
-Then, we use one-way ANOVA to analyse the transformed data on the furniture factor. \#### One-way ANOVA Test
+### Addtional Analyse for Temporal Demands on the Layout Factor using Friedman's test
+Then, we use Friedman's test to analyse the layout factor.
 
 ```{r}
-model.t.furniture <- anova(art.t.furniture)
-model.t.furniture
+data.temporal.layout <- data.subjective %>% dplyr::group_by(PID, Layout) %>% dplyr::summarise(Temporal = mean(Temporal), .groups = "drop")
+friedman.test(y=data.temporal.layout$Temporal, groups=data.temporal.layout$Layout, blocks=data.temporal.layout$PID)
 ```
+A Friedman's test revealed no significant effect of Layout factor on Temporal Demands (chi-squared = 0, p = 1).
 
-From the output, it can be seen that the p value is 0.24124 which is more than 0.05. It means that there is no evidence to suggest that the Temporal demands is statistically significantly different for different furniture conditions \### Analyse Temporal Demands on the Layout Factor Then, we use one-way ANOVA to analyse the transformed data on the layout factor. \#### One-way ANOVA Test
-
+### Addtional Analyse for Temporal Demands on the four conditions using Friedman's test
+Then, we use Friedman's test to analyse the four conditions.
 ```{r}
-model.t.layout <- anova(art.t.layout)
-model.t.layout
+data.temporal.condition <- data.subjective %>% dplyr::group_by(PID, Condition) %>% dplyr::summarise(Temporal = mean(Temporal), .groups = "drop")
+friedman.test(y=data.temporal.condition$Temporal, groups=data.temporal.condition$Condition, blocks=data.temporal.condition$PID)
 ```
+A Friedman's test revealed no significant effect of four conditions on Temporal Demands (chi-squared = 1.3, p = 0.7).
 
-From the output, it can be seen that the p value is 0.55225 which is more than 0.05. It means that there is no evidence to suggest that the Temporal demands is statistically significantly different for different layout conditions.
 
-### Visualisation
-
-```{r}
-d <- Rmisc::summarySE(data.subjective, measurevar = "Temporal", groupvars = c("Condition"))
-ggplot(d, aes(x = Condition, y = Temporal)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Temporal-ci, ymax=Temporal+ci))
-```
 
 ## Performance
-
 ### Check Normality
-
 ```{r}
 shapiro.test(data.subjective$Performance)
 ```
-
-p \< 0.01, NASA-TLX Performance data are not normally distributed. So we use ARTools to transform the data.
-
+p < 0.01, NASA-TLX Performance data are not normally distributed. So we use ARTools to transform the data for multi-factor analysis. And then we use Friedman tests for single factor analysis.
 ```{r}
-art.s.both <- art(Performance ~ Furniture * Layout + Error(PID), data = data.subjective)
-art.s.furniture <- art(Performance ~ Furniture + Error(PID), data = data.subjective)
-art.s.layout <- art(Performance ~ Layout + Error(PID), data = data.subjective)
+art.pe.both <- art(Performance ~ Furniture * Layout + Error(PID), data = data.subjective)
 ```
 
 ### Analyse Performance on the combination of two factors
+We first check the homogenity using bartlett's test.
 
-Then, we use two-way ANOVA to analyse the transformed data. We first check the homogenity using bartlett's test. \#### Check Homogenity
-
+#### Check Homogenity
 ```{r}
 bartlett.test(Performance ~ interaction(Furniture,Layout), data = data.subjective)
 ```
 
-From the output, it can be seen that the p-value of 0.7078 is not less than the significance level of 0.05. This means that there is no evidence to suggest that the variance in performance is statistically significantly different for different factors or the combination of factors. Thus, we can assume the homogenity. \#### Two-way ANOVA
+From the output, it can be seen that the p-value of **0.7078** is not less than the significance level of 0.05. This means that there is no evidence to suggest that the variance in **Performance** is statistically significantly different **among different factors or the combination of factors.** Thus, we can assume the homogenity.
 
+#### Two-way ANOVA
 ```{r}
-model.s.both <- anova(art.s.both)
-model.s.both
+model.pe.both <- anova(art.pe.both)
+model.pe.both$part.eta.sq = with(model.pe.both, `Sum Sq`/(`Sum Sq` + `Sum Sq.res`))
+
+model.pe.both
 ```
 
-From the output, it can be seen that we have significant main effects of Furniture (p \< 0.05). \#### Effect Size
+From the output, it can be seen that we have significant main effects of Furniture **(p < 0.01)** with an effect size **partial eta-squared 0.22**. The effect size can be interpreted as a **large effect (eta-squared >= 0.14)**.
+
+### Addtional Analyse for Performance on the Furniture Factor using Friedman's test
+Then, we use Friedman's test to analyse the furniture factor.
+```{r}
+data.performance.furniture <- data.subjective %>% dplyr::group_by(PID, Furniture) %>% dplyr::summarise(Performance = mean(Performance), .groups = "drop")
+friedman.test(y=data.performance.furniture$Performance, groups=data.performance.furniture$Furniture, blocks=data.performance.furniture$PID)
+```
+A Friedman's test revealed a significant effect of Furniture factor on Performance **(chi-squared = 6.2, p < 0.05)**.
+```{r}
+data.performance.furniture <- as.data.frame(data.performance.furniture)
+data.performance.furniture %>% friedman_effsize(Performance ~ Furniture | PID)
+```
+The effect size (Kendall's W) for Furniture is 0.39. It implies a moderate effect size.
+
+### Addtional Analyse for Performance on the Layout Factor using Friedman's test
+Then, we use Friedman's test to analyse the layout factor.
 
 ```{r}
-eta_squared(model.s.both)
+data.performance.layout <- data.subjective %>% dplyr::group_by(PID, Layout) %>% dplyr::summarise(Performance = mean(Performance), .groups = "drop")
+friedman.test(y=data.performance.layout$Performance, groups=data.performance.layout$Layout, blocks=data.performance.layout$PID)
 ```
+From the output, it can be seen that the p value is 1 which is more than 0.05. It means that there is no evidence to suggest that the performance is statistically significantly different among different layouts.
 
-The effect size (eta-squared) for Furniture is 0.22.
+### Addtional Analyse for Performance on the four conditions using Friedman's test
+Then, we use Friedman's test to analyse the four conditions.
+```{r}
+data.performance.condition <- data.subjective %>% dplyr::group_by(PID, Condition) %>% dplyr::summarise(Performance = mean(Performance), .groups = "drop")
+friedman.test(y=data.performance.condition$Performance, groups=data.performance.condition$Condition, blocks=data.performance.condition$PID)
+```
+A Friedman's test revealed a significant effect of four conditions on Performance **(chi-squared = 12.4, p < 0.01)**.
 
-### Analyse Performance on the Furniture Factor
-
-Then, we use one-way ANOVA to analyse the transformed data on the furniture factor. \#### One-way ANOVA Test
 
 ```{r}
-model.s.furniture <- anova(art.s.furniture)
-model.s.furniture
+data.performance.condition <- as.data.frame(data.performance.condition)
+data.performance.condition %>% friedman_effsize(Performance ~ Condition | PID)
 ```
-
-From the output, it can be seen that we have significant effects of Furniture factor (p \< 0.05). \#### Effect Size
+The effect size (Kendall's W) is 0.26. It implies a small effect size.
 
 ```{r}
-eta_squared(model.s.furniture)
+pairwise.wilcox.test(data.performance.condition$Performance, data.performance.condition$Condition, p.adj="bonferroni", exact=F, paired=T)
 ```
+A post-hoc test using Wilcoxon tests with Bonferroni correction showed no significant differences among four conditions.
 
-The effect size (eta-squared) for Furniture is 0.22.
 
-### Analyse Performance on the Layout Factor
 
-Then, we use one-way ANOVA to analyse the transformed data on the layout factor. \#### One-way ANOVA Test
 
-```{r}
-model.s.layout <- anova(art.s.layout)
-model.s.layout
-```
-
-From the output, it can be seen that the p value is 0.66168 which is more than 0.05. It means that there is no evidence to suggest that the Performance is statistically significantly different for different layouts.
-
-### Visualisation
-
-```{r}
-d <- Rmisc::summarySE(data.subjective, measurevar = "Performance", groupvars = c("Condition"))
-ggplot(d, aes(x = Condition, y = Performance)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Performance-ci, ymax=Performance+ci))
-```
 
 ## Effort
-
 ### Check Normality
-
 ```{r}
 shapiro.test(data.subjective$Effort)
 ```
-
-p \< 0.01, NASA-TLX Effort data are not normally distributed. So we use ARTools to transform the data.
-
+p < 0.01, NASA-TLX Effort data are not normally distributed. So we use ARTools to transform the data for multi-factor analysis. And then we use Friedman tests for single factor analysis.
 ```{r}
 art.e.both <- art(Effort ~ Furniture * Layout + Error(PID), data = data.subjective)
-art.e.furniture <- art(Effort ~ Furniture + Error(PID), data = data.subjective)
-art.e.layout <- art(Effort ~ Layout + Error(PID), data = data.subjective)
 ```
 
 ### Analyse Effort on the combination of two factors
+We first check the homogenity using bartlett's test.
 
-Then, we use two-way ANOVA to analyse the transformed data. We first check the homogenity using bartlett's test. \#### Check Homogenity
-
+#### Check Homogenity
 ```{r}
 bartlett.test(Effort ~ interaction(Furniture,Layout), data = data.subjective)
 ```
 
-From the output, it can be seen that the p-value of 0.9971 is not less than the significance level of 0.05. This means that there is no evidence to suggest that the variance in Effort is statistically significantly different for different factors or the combination of factors. Thus, we can assume the homogenity. \#### Two-way ANOVA
+From the output, it can be seen that the p-value of **0.9971** is not less than the significance level of 0.05. This means that there is no evidence to suggest that the variance in **Effort** is statistically significantly different **among different factors or the combination of factors.** Thus, we can assume the homogenity.
 
+#### Two-way ANOVA
 ```{r}
 model.e.both <- anova(art.e.both)
+model.e.both$part.eta.sq = with(model.e.both, `Sum Sq`/(`Sum Sq` + `Sum Sq.res`))
+
 model.e.both
 ```
 
-From the output, it can be seen that we have significant main effects of Furniture (p \< 0.05). \#### Effect Size
+From the output, it can be seen that we have significant main effects of Furniture **(p < 0.01)** with an effect size **partial eta-squared 0.14**. The effect size can be interpreted as a **large effect (eta-squared >= 0.14)**.
+
+### Addtional Analyse for Effort on the Furniture Factor using Friedman's test
+Then, we use Friedman's test to analyse the furniture factor.
+```{r}
+data.effort.furniture <- data.subjective %>% dplyr::group_by(PID, Furniture) %>% dplyr::summarise(Effort = mean(Effort), .groups = "drop")
+friedman.test(y=data.effort.furniture$Effort, groups=data.effort.furniture$Furniture, blocks=data.effort.furniture$PID)
+```
+A Friedman's test revealed no significant effect of Furniture factor on Effort **(chi-squared = 1.9, p = 0.17)**.
+
+### Addtional Analyse for Effort on the Layout Factor using Friedman's test
+Then, we use Friedman's test to analyse the layout factor.
 
 ```{r}
-eta_squared(model.e.both)
+data.effort.layout <- data.subjective %>% dplyr::group_by(PID, Layout) %>% dplyr::summarise(Effort = mean(Effort), .groups = "drop")
+friedman.test(y=data.effort.layout$Effort, groups=data.effort.layout$Layout, blocks=data.effort.layout$PID)
 ```
+A Friedman's test revealed no significant effect of Layout factor on Effort **(chi-squared = 1.9, p = 0.17)**.
 
-The effect size (eta-squared) for Furniture is 0.14.
 
-### Analyse Effort on the Furniture Factor
+### Addtional Analyse for Effort on the four conditions using Friedman's test
+Then, we use Friedman's test to analyse the four conditions.
+```{r}
+data.effort.condition <- data.subjective %>% dplyr::group_by(PID, Condition) %>% dplyr::summarise(Effort = mean(Effort), .groups = "drop")
+friedman.test(y=data.effort.condition$Effort, groups=data.effort.condition$Condition, blocks=data.effort.condition$PID)
+```
+A Friedman's test revealed a significant effect of four conditions on Effort **(chi-squared = 8.7, p < 0.05)**.
 
-Then, we use one-way ANOVA to analyse the transformed data on the furniture factor. \#### One-way ANOVA Test
 
 ```{r}
-model.e.furniture <- anova(art.e.furniture)
-model.e.furniture
+data.effort.condition <- as.data.frame(data.effort.condition)
+data.effort.condition %>% friedman_effsize(Effort ~ Condition | PID)
 ```
-
-From the output, it can be seen that we have significant effects of Furniture factor (p \< 0.05). \#### Effect Size
+The effect size (Kendall's W) is 0.18. It implies a small effect size.
 
 ```{r}
-eta_squared(model.e.furniture)
+pairwise.wilcox.test(data.effort.condition$Effort, data.effort.condition$Condition, p.adj="bonferroni", exact=F, paired=T)
 ```
+A post-hoc test using Wilcoxon tests with Bonferroni correction showed no significant differences among four conditions.
 
-The effect size (eta-squared) for Furniture is 0.14.
 
-### Analyse Effort on the Layout Factor
 
-Then, we use one-way ANOVA to analyse the transformed data on the layout factor. \#### One-way ANOVA Test
 
-```{r}
-model.e.layout <- anova(art.e.layout)
-model.e.layout
-```
-
-From the output, it can be seen that the p value is 0.09118 which is more than 0.05. It means that there is weak evidence to suggest that the Effort is statistically significantly different for different layouts. We will not report this layout effect as significant difference.
-
-### Visualisation
-
-```{r}
-d <- Rmisc::summarySE(data.subjective, measurevar = "Effort", groupvars = c("Condition"))
-ggplot(d, aes(x = Condition, y = Effort)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Effort-ci, ymax=Effort+ci))
-```
 
 ## Frustration
-
 ### Check Normality
-
 ```{r}
 shapiro.test(data.subjective$Frustration)
 ```
-
-p \< 0.01, NASA-TLX Frustration data are not normally distributed. So we use ARTools to transform the data.
-
+p < 0.01, NASA-TLX Frustration data are not normally distributed. So we use ARTools to transform the data for multi-factor analysis. And then we use Friedman tests for single factor analysis.
 ```{r}
 art.f.both <- art(Frustration ~ Furniture * Layout + Error(PID), data = data.subjective)
-art.f.furniture <- art(Frustration ~ Furniture + Error(PID), data = data.subjective)
-art.f.layout <- art(Frustration ~ Layout + Error(PID), data = data.subjective)
 ```
 
 ### Analyse Frustration on the combination of two factors
+We first check the homogenity using bartlett's test.
 
-Then, we use two-way ANOVA to analyse the transformed data. We first check the homogenity using bartlett's test. \#### Check Homogenity
-
+#### Check Homogenity
 ```{r}
 bartlett.test(Frustration ~ interaction(Furniture,Layout), data = data.subjective)
 ```
 
-From the output, it can be seen that the p-value of 0.438 is not less than the significance level of 0.05. This means that there is no evidence to suggest that the variance in Frustration is statistically significantly different for different factors or the combination of factors. Thus, we can assume the homogenity. \#### Two-way ANOVA
+From the output, it can be seen that the p-value of **0.438** is not less than the significance level of 0.05. This means that there is no evidence to suggest that the variance in **Frustration** is statistically significantly different **among different factors or the combination of factors.** Thus, we can assume the homogenity.
 
+#### Two-way ANOVA
 ```{r}
 model.f.both <- anova(art.f.both)
+model.f.both$part.eta.sq = with(model.f.both, `Sum Sq`/(`Sum Sq` + `Sum Sq.res`))
+
 model.f.both
 ```
 
-From the output, it can be seen that we have significant main effects of Furniture (p \< 0.05). \#### Effect Size
+From the output, it can be seen that we have significant main effects of Furniture **(p < 0.05)** with an effect size **partial eta-squared 0.1**. The effect size can be interpreted as a **medium effect (0.06 - 0.14)**.
+
+### Addtional Analyse for Frustration on the Furniture Factor using Friedman's test
+Then, we use Friedman's test to analyse the furniture factor.
+```{r}
+data.frustration.furniture <- data.subjective %>% dplyr::group_by(PID, Furniture) %>% dplyr::summarise(Frustration = mean(Frustration), .groups = "drop")
+friedman.test(y=data.frustration.furniture$Frustration, groups=data.frustration.furniture$Furniture, blocks=data.frustration.furniture$PID)
+```
+A Friedman's test revealed no significant effect of Furniture factor on Frustration **(chi-squared = 3.8, p = 0.052)**.
+
+### Addtional Analyse for Frustration on the Layout Factor using Friedman's test
+Then, we use Friedman's test to analyse the layout factor.
 
 ```{r}
-eta_squared(model.f.both)
+data.frustration.layout <- data.subjective %>% dplyr::group_by(PID, Layout) %>% dplyr::summarise(Frustration = mean(Frustration), .groups = "drop")
+friedman.test(y=data.frustration.layout$Frustration, groups=data.frustration.layout$Layout, blocks=data.frustration.layout$PID)
 ```
+A Friedman's test revealed no significant effect of Furniture factor on Frustration **(chi-squared = 0.6, p = 0.44)**.
 
-The effect size (eta-squared) for Furniture is 0.1.
-
-### Analyse Frustration on the Furniture Factor
-
-Then, we use one-way ANOVA to analyse the transformed data on the furniture factor. \#### One-way ANOVA Test
-
+### Addtional Analyse for Frustration on the four conditions using Friedman's test
+Then, we use Friedman's test to analyse the four conditions.
 ```{r}
-model.f.furniture <- anova(art.f.furniture)
-model.f.furniture
+data.frustration.condition <- data.subjective %>% dplyr::group_by(PID, Condition) %>% dplyr::summarise(Frustration = mean(Frustration), .groups = "drop")
+friedman.test(y=data.frustration.condition$Frustration, groups=data.frustration.condition$Condition, blocks=data.frustration.condition$PID)
 ```
+A Friedman's test revealed no significant effect of four conditions on Frustration **(chi-squared = 6.5, p = 0.09)**.
 
-From the output, it can be seen that we have significant effects of Furniture factor (p \< 0.05). \#### Effect Size
 
-```{r}
-eta_squared(model.f.furniture)
-```
 
-The effect size (eta-squared) for Furniture is 0.09.
 
-### Analyse Frustration on the Layout Factor
-
-Then, we use one-way ANOVA to analyse the transformed data on the layout factor. \#### One-way ANOVA Test
-
-```{r}
-model.f.layout <- anova(art.f.layout)
-model.f.layout
-```
-
-From the output, it can be seen that the p value is 0.40943 which is more than 0.05. It means that there is no evidence to suggest that the Frustration is statistically significantly different for different layouts.
-
-### Visualisation
-
-```{r}
-d <- Rmisc::summarySE(data.subjective, measurevar = "Frustration", groupvars = c("Condition"))
-ggplot(d, aes(x = Condition, y = Frustration)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Frustration-ci, ymax=Frustration+ci))
-```
 
 ## Mean NASA-TLX Score
 
 ### Check Normality
-
 ```{r}
 shapiro.test(data.subjective$Mean)
 ```
-
-p \< 0.01, NASA-TLX Mean Score data are not normally distributed. So we use ARTools to transform the data.
-
+p < 0.05, NASA-TLX Mean data are not normally distributed. So we use ARTools to transform the data for multi-factor analysis. And then we use Friedman tests for single factor analysis.
 ```{r}
-art.mean.both <- art(Mean ~ Furniture * Layout + Error(PID), data = data.subjective)
-art.mean.furniture <- art(Mean ~ Furniture + Error(PID), data = data.subjective)
-art.mean.layout <- art(Mean ~ Layout + Error(PID), data = data.subjective)
+art.me.both <- art(Mean ~ Furniture * Layout + Error(PID), data = data.subjective)
 ```
 
-### Analyse Mean Score on the combination of two factors
+### Analyse Mean on the combination of two factors
+We first check the homogenity using bartlett's test.
 
-Then, we use two-way ANOVA to analyse the transformed data. We first check the homogenity using bartlett's test. \#### Check Homogenity
-
+#### Check Homogenity
 ```{r}
 bartlett.test(Mean ~ interaction(Furniture,Layout), data = data.subjective)
 ```
 
-From the output, it can be seen that the p-value of 0.8895 is not less than the significance level of 0.05. This means that there is no evidence to suggest that the variance in Mean Score is statistically significantly different for different factors or the combination of factors. Thus, we can assume the homogenity. \#### Two-way ANOVA
+From the output, it can be seen that the p-value of **0.8895** is not less than the significance level of 0.05. This means that there is no evidence to suggest that the variance in **Mean** is statistically significantly different **among different factors or the combination of factors.** Thus, we can assume the homogenity.
 
+#### Two-way ANOVA
 ```{r}
-model.mean.both <- anova(art.mean.both)
-model.mean.both
+model.me.both <- anova(art.me.both)
+model.me.both$part.eta.sq = with(model.me.both, `Sum Sq`/(`Sum Sq` + `Sum Sq.res`))
+
+model.me.both
 ```
 
-From the output, it can be seen that we have significant main effects of Furniture (p \< 0.05). \#### Effect Size
+From the output, it can be seen that we have significant main effects of Furniture **(p < 0.01)** with an effect size **partial eta-squared 0.25**. The effect size can be interpreted as a **large effect (eta-squared >= 0.14)**.
+
+### Addtional Analyse for Mean on the Furniture Factor using Friedman's test
+Then, we use Friedman's test to analyse the furniture factor.
+```{r}
+data.mean.furniture <- data.subjective %>% dplyr::group_by(PID, Furniture) %>% dplyr::summarise(Mean = mean(Mean), .groups = "drop")
+friedman.test(y=data.mean.furniture$Mean, groups=data.mean.furniture$Furniture, blocks=data.mean.furniture$PID)
+```
+A Friedman's test revealed a significant effect of Furniture factor on Mean **(chi-squared = 4, p < 0.05)**.
+```{r}
+data.mean.furniture <- as.data.frame(data.mean.furniture)
+data.mean.furniture %>% friedman_effsize(Mean ~ Furniture | PID)
+```
+The effect size (Kendall's W) for Furniture is 0.25. It implies a small effect size.
+
+### Addtional Analyse for Mean on the Layout Factor using Friedman's test
+Then, we use Friedman's test to analyse the layout factor.
 
 ```{r}
-eta_squared(model.mean.both)
+data.mean.layout <- data.subjective %>% dplyr::group_by(PID, Layout) %>% dplyr::summarise(Mean = mean(Mean), .groups = "drop")
+friedman.test(y=data.mean.layout$Mean, groups=data.mean.layout$Layout, blocks=data.mean.layout$PID)
 ```
+From the output, it can be seen that the p value is 0.61 which is more than 0.05. It means that there is no evidence to suggest that the Mean is statistically significantly different among different layouts.
 
-The effect size (eta-squared) for Furniture is 0.25.
+### Addtional Analyse for Mean on the four conditions using Friedman's test
+Then, we use Friedman's test to analyse the four conditions.
+```{r}
+data.mean.condition <- data.subjective %>% dplyr::group_by(PID, Condition) %>% dplyr::summarise(Mean = mean(Mean), .groups = "drop")
+friedman.test(y=data.mean.condition$Mean, groups=data.mean.condition$Condition, blocks=data.mean.condition$PID)
+```
+A Friedman's test revealed a significant effect of four conditions on Mean **(chi-squared = 13.5, p < 0.01)**.
 
-### Analyse Mean Score on the Furniture Factor
-
-Then, we use one-way ANOVA to analyse the transformed data on the furniture factor. \#### One-way ANOVA Test
 
 ```{r}
-model.mean.furniture <- anova(art.mean.furniture)
-model.mean.furniture
+data.mean.condition <- as.data.frame(data.mean.condition)
+data.mean.condition %>% friedman_effsize(Mean ~ Condition | PID)
 ```
-
-From the output, it can be seen that we have significant effects of Furniture factor (p \< 0.05). \#### Effect Size
+The effect size (Kendall's W) is 0.28. It implies a small effect size.
 
 ```{r}
-eta_squared(model.mean.furniture)
+pairwise.wilcox.test(data.mean.condition$Mean, data.mean.condition$Condition, p.adj="bonferroni", exact=F, paired=T)
+
+wilcox_test(Mean ~ factor(Condition), data=data.mean.condition[data.mean.condition$Condition=="Furniture-Regular"|data.mean.condition$Condition=="NoFurniture-Irregular",], distribution="exact")
+2.215 / sqrt(32)
+
+wilcox_test(Mean ~ factor(Condition), data=data.mean.condition[data.mean.condition$Condition=="Furniture-Irregular"|data.mean.condition$Condition=="NoFurniture-Irregular",], distribution="exact")
+1.7582 / sqrt(32)
 ```
+A post-hoc test using Wilcoxon tests with Bonferroni correction showed a significant differences between Condition "Furniture-Regular" and "NoFurniture-Irregular" (p < 0.05, r = 0.39) and between Condition "NoFurniture-Irregular" and  "Furniture-Irregular" (p < 0.05, r = 0.31).
 
-The effect size (eta-squared) for Furniture is 0.24.
 
-### Analyse Mean Score on the Layout Factor
 
-Then, we use one-way ANOVA to analyse the transformed data on the layout factor. \#### One-way ANOVA Test
 
-```{r}
-model.mean.layout <- anova(art.mean.layout)
-model.mean.layout
-```
 
-From the output, it can be seen that the p value is 0.15772 which is more than 0.05. It means that there is no evidence to suggest that the Mean Score is statistically significantly different for different layouts.
-
-### Visualisation
-
-```{r}
-d <- Rmisc::summarySE(data.subjective, measurevar = "Mean", groupvars = c("Condition"))
-ggplot(d, aes(x = Condition, y = Mean)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Mean-ci, ymax=Mean+ci))
-```
-
-## Visualisation
-
+## NASA-TLX Conclusion and Visualisation
 ```{r}
 mean_Chart <- aggregate(cbind(Mental, Physical, Temporal, Performance, Effort, Frustration, Mean)~Furniture , data=data.subjective , mean)
 rownames(mean_Chart) <- mean_Chart[,1]
@@ -777,86 +806,410 @@ stdev_Chart <- aggregate(cbind(Mental, Physical, Temporal, Performance, Effort, 
 rownames(stdev_Chart) <- stdev_Chart[,1]
 se_Baseline <- as.matrix(stdev_Chart[,-1]) / sqrt(12)
 
-ze_barplot <- barplot(mean_Chart , beside=T , legend.text=T,col=c("#ed7d31", "#4472c4") , ylim=c(0,lim) , ylab="NASA-TLX Score", args.legend = list(x = "topright", inset = c(0, -0.15)), cex.names=0.8)
+ze_barplot <- barplot(mean_Chart , beside=T , legend.text=T,col=c("#66c2a5", "#fc8d62") , ylim=c(0,lim) , ylab="NASA-TLX Score", args.legend = list(x = "topright", inset = c(0, -0.15)), cex.names=0.8)
 error.bar(ze_barplot, mean_Chart, se_Baseline)
 ```
+For the NASA-TLX result analysis on the Furniture factor, the ANOVA test of Aligned Rank Transformed data shows significant effects for **Mental (p < 0.001, effect size partial eta-squared = 0.29)**, **Physical (p < 0.05, effect size partial eta-squared = 0.10)**, **Performance (p < 0.01, effect size partial eta-squared = 0.22)**, **Effort (p < 0.01, effect size partial eta-squared = 0.14)**, **Frustration (p < 0.05, effect size partial eta-squared = 0.10)**, and **overall mean (p < 0.001, effect size partial eta-squared = 0.25)**. The results show that the participants perform the best in the Furniture condition with the least mental effort, physical effort, and frustration.
+
+From the additional analysis on the Furniture factor using Friedman's test, it shows significant effects for **Mental (p < 0.05, chi-squared = 5.3, effect size Kendall’s W = 0.33)**, **Physical (p < 0.01, chi-squared = 5.3, effect size Kendall’s W = 0.46)**, **Performance (p < 0.05, chi-squared = 6.2, effect size Kendall’s W = 0.39)**, and **overall mean (p < 0.05, chi-squared = 4, effect size Kendall’s W = 0.25)**. The results further proves that the participants perform the best in the Furniture condition with the least mental and physical effort.
+
+Particularly, by analysing the effects on the four conditions using Friedman's test and a post-hoc test using Wilcoxon tests with Bonferroni correction, we find significant differences between Condition **“Furniture-Regular”** and **“NoFurniture-Irregular”** on **Mental (p < 0.05, r = 0.34)**, **Physical (p < 0.05, r = 0.32)**, and **Overall mean (p < 0.05, r = 0.39)**. We also find dignificant differences between Condition **“NoFurniture-Irregular”** and **“Furniture-Irregular”** on the **Overall mean (p < 0.05, r = 0.31)**.
 
 # Participant Rating for different conditions
-
 ## Load cleaned Rating data into the global environment
-
 ```{r}
 load("data.rating.Rdata")
+summary(data.rating)
 ```
 
 ## Check Normality
-
 ```{r}
 shapiro.test(data.rating$Rating)
 ```
-
-p \< 0.01, user Rating data are not normally distributed. So we use ARTools to transform the data.
-
+p < 0.01, user rating data are not normally distributed. So we use ARTools to transform the data for multi-factor analysis. And then we use Friedman tests for single factor analysis.
 ```{r}
 art.rating.both <- art(Rating ~ Furniture * Layout + Error(PID), data = data.rating)
-art.rating.furniture <- art(Rating ~ Furniture + Error(PID), data = data.rating)
-art.rating.layout <- art(Rating ~ Layout + Error(PID), data = data.rating)
 ```
-
-## Participant Ratings Analysis with Factor Combinition
-
-Then, we use two-way ANOVA to analyse the transformed data. We first check the homogenity using bartlett's test. \#### Check Homogenity
-
+## Analyse Performance on the combination of two factors
+We first check the homogenity using bartlett's test.
+### Check Homogenity
 ```{r}
 bartlett.test(Rating ~ interaction(Furniture,Layout), data = data.rating)
 ```
 
-From the output, it can be seen that the p-value of 0.2893 is not less than the significance level of 0.05. This means that there is no evidence to suggest that the variance in Rating is statistically significantly different for different factors or the combination of factors. Thus, we can assume the homogenity. \#### Two-way ANOVA
-
+From the output, it can be seen that the p-value of **0.2893** is not less than the significance level of 0.05. This means that there is no evidence to suggest that the variance in **User Rating** is statistically significantly different **among different factors or the combination of factors.** Thus, we can assume the homogenity.
+### Two-way ANOVA
 ```{r}
 model.rating.both <- anova(art.rating.both)
+model.rating.both$part.eta.sq = with(model.rating.both, `Sum Sq`/(`Sum Sq` + `Sum Sq.res`))
+
 model.rating.both
 ```
 
-From the output, it can be seen that we have significant main effects of Furniture (p \< 0.05). \#### Effect Size
+From the output, it can be seen that we have significant main effects of Furniture **(p < 0.01)** with an effect size **partial eta-squared 0.31**. The effect size can be interpreted as a **large effect (eta-squared >= 0.14)**.
+
+## Addtional Analyse for User Rating on the Furniture Factor using Friedman's test
+Then, we use Friedman's test to analyse the furniture factor.
+```{r}
+data.rating.furniture <- data.rating %>% dplyr::group_by(PID, Furniture) %>% dplyr::summarise(Rating = mean(Rating), .groups = "drop")
+friedman.test(y=data.rating.furniture$Rating, groups=data.rating.furniture$Furniture, blocks=data.rating.furniture$PID)
+```
+A Friedman's test revealed a significant effect of Furniture factor on Rating **(chi-squared = 4.6, p < 0.05)**.
+```{r}
+data.rating.furniture <- as.data.frame(data.rating.furniture)
+data.rating.furniture %>% friedman_effsize(Rating ~ Furniture | PID)
+```
+The effect size (Kendall's W) for Furniture is 0.29. It implies a small effect size.
+
+## Addtional Analyse for User Rating on the Layout Factor using Friedman's test
+Then, we use Friedman's test to analyse the layout factor.
 
 ```{r}
-eta_squared(model.rating.both)
+data.rating.layout <- data.rating %>% dplyr::group_by(PID, Layout) %>% dplyr::summarise(Rating = mean(Rating), .groups = "drop")
+friedman.test(y=data.rating.layout$Rating, groups=data.rating.layout$Layout, blocks=data.rating.layout$PID)
 ```
+From the output, it can be seen that the p value is 0.37 which is more than 0.05. It means that there is no evidence to suggest that the performance is statistically significantly different among different layouts.
 
-The effect size (eta-squared) for Furniture is 0.31.
+## Addtional Analyse for User Rating on the four conditions using Friedman's test
+Then, we use Friedman's test to analyse the four conditions.
+```{r}
+data.rating.condition <- data.rating %>% dplyr::group_by(PID, Condition) %>% dplyr::summarise(Rating = mean(Rating), .groups = "drop")
+friedman.test(y=data.rating.condition$Rating, groups=data.rating.condition$Condition, blocks=data.rating.condition$PID)
+```
+A Friedman's test revealed a significant effect of four conditions on User Rating **(chi-squared = 13.1, p < 0.01)**.
 
-### Analyse User Rating on the Furniture Factor
-
-Then, we use one-way ANOVA to analyse the transformed data on the furniture factor. \#### One-way ANOVA Test
 
 ```{r}
-model.rating.furniture <- anova(art.rating.furniture)
-model.rating.furniture
+data.rating.condition <- as.data.frame(data.rating.condition)
+data.rating.condition %>% friedman_effsize(Rating ~ Condition | PID)
 ```
-
-From the output, it can be seen that we have significant effects of Furniture factor (p \< 0.05). \#### Effect Size
+The effect size (Kendall's W) is 0.27. It implies a small effect size.
 
 ```{r}
-eta_squared(model.rating.furniture)
+pairwise.wilcox.test(data.rating.condition$Rating, data.rating.condition$Condition, p.adj="bonferroni", exact=F, paired=T)
+
+wilcox_test(Rating ~ factor(Condition), data=data.rating.condition[data.rating.condition$Condition=="Furniture+Regular"|data.rating.condition$Condition=="NoFurniture+Irregular",], distribution="exact")
+3.7797 / sqrt(32)
+
+wilcox_test(Rating ~ factor(Condition), data=data.rating.condition[data.rating.condition$Condition=="Furniture+Irregular"|data.rating.condition$Condition=="NoFurniture+Irregular",], distribution="exact")
+3.1177 / sqrt(32)
 ```
+A post-hoc test using Wilcoxon tests with Bonferroni correction showed a significant differences between Condition "Furniture-Regular" and "NoFurniture-Irregular" (p < 0.05, r = 0.67) and between Condition "NoFurniture-Irregular" and "Furniture-Irregular" (p < 0.05, r = 0.55).
 
-The effect size (eta-squared) for Furniture is 0.30.
 
-### Analyse User Rating on the Layout Factor
-
-Then, we use one-way ANOVA to analyse the transformed data on the layout factor. \#### One-way ANOVA Test
-
-```{r}
-model.rating.layout <- anova(art.rating.layout)
-model.rating.layout
-```
-
-From the output, it can be seen that the p value is 0.20149 which is more than 0.05. It means that there is no evidence to suggest that the Mean Score is statistically significantly different for different layouts.
-
-### Visualisation
-
+## User Rating Conclusion and Visualisation
 ```{r}
 d <- Rmisc::summarySE(data.rating, measurevar = "Rating", groupvars = c("Condition"))
-ggplot(d, aes(x = Condition, y = Rating)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Rating-ci, ymax=Rating+ci))
+ggplot(d, aes(x = Condition, y = Rating, fill = Condition)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Rating-ci, ymax=Rating+ci)) + scale_fill_manual(values=c("#e41a1c", "#377eb8", "#984ea3", "#ff7f00"))
 ```
+For the quantitative analysis on the User Ratings of two factors, we can see that from the ANOVA test of Aligned Rank Transformed data, we have significant main effects of **Furniture (p < 0.01)** with an **effect size partial eta-squared 0.31**. The effect size can be interpreted as **a large effect (eta-squared >= 0.14)**. An additional Friedman's test proves the significant effect of Furniture factor **(p < 0.05, chi-squared = 4.6, effect size Kendall’s W = 0.29)**. 
+
+Another Friedman's test and a post-hoc Wilcoxon tests with Bonferroni correction on the User Ratings of four conditions shows that there is a significant differences between Condition **“Furniture-Regular”** and **“NoFurniture-Irregular”** **(p < 0.05, r = 0.67)** and between Condition **“NoFurniture-Irregular”** and **“Furniture-Irregular”** **(p < 0.05, r = 0.55)**.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Recall Time Results
+## R Libraries
+```{r}
+library(dplyr)
+library(ggpubr)
+library(rstatix)
+library(effectsize)
+library(pwr)
+```
+
+## Load raw Recall Time data into global environment
+```{r}
+load("data.recallTime.raw.Rdata")
+summary(data.recallTime.raw)
+```
+
+## Data Wrangling
+### Visualizing Outliers
+```{r}
+boxplot(data.recallTime.raw$AnswerTime)
+```
+
+### Finding Outliers
+```{r}
+Q <- quantile(data.recallTime.raw$AnswerTime, probs=c(.25, .75), na.rm = FALSE)
+iqr <- IQR(data.recallTime.raw$AnswerTime)
+up <-  Q[2]+1.5*iqr # Upper Range 
+outliers <- subset(data.recallTime.raw, data.recallTime.raw$AnswerTime >= up)
+outliers
+```
+We found 20 trials where participants spent more than usual time (> 49.3s) during the recall phase, causing the data not valid. We then remove those 20 trials from the raw data.
+
+### Eliminating Outliers
+```{r}
+data.recallTime.eliminated <- subset(data.recallTime.raw, data.recallTime.raw$AnswerTime < up)
+str(data.recallTime.eliminated)
+summary(data.recallTime.eliminated)
+```
+After removing, we have 300 observations left for further analysis.
+
+### Aggregate Recall Time Data
+```{r}
+data.recallTime.eliminated = subset(data.recallTime.eliminated, select = -TrialID)
+data.recallTime <- data.recallTime.eliminated %>% group_by(PID, Condition) %>% mutate(AnswerTime = mean(AnswerTime)) %>% ungroup()
+data.recallTime <- distinct(data.recallTime)
+data.recallTime.female <- filter(data.recallTime, as.integer(data.recallTime$PID) <= 8)
+data.recallTime.male  <- filter(data.recallTime, as.integer(data.recallTime$PID) > 8)
+summary(data.recallTime)
+```
+### Test normality in the main dataset
+```{r}
+shapiro.test(data.recallTime$AnswerTime) 
+```
+We can clearly see from the result that p value is > 0.05, which means that the dataare normally distributed. So, we use ANOVA test for different dependent variables.
+
+### Analysis of Two Factors combination
+#### Check Homogenity
+```{r}
+bartlett.test(AnswerTime ~ interaction(Furniture, Layout), data = data.recallTime)
+```
+From the output, it can be seen that the p-value of **0.5888** is not less than the significance level of 0.05. This means that there is no evidence to suggest that the variance in **Recall Time** is statistically significantly different among different **factors or the combination of factors**. Thus, we can assume the homogenity.
+
+#### Two-way Repeated measures ANOVA
+```{r}
+model.recallTime <- aov(AnswerTime ~ Furniture * Layout + Error(PID), data = data.recallTime)
+
+summary(model.recallTime)
+```
+From the two-way repeated measures ANOVA results above, we can see that there is no significant effects for any of the factors or combinations of the factors. 
+
+### Analysis of Furniture Factor
+#### Unpaired T Test
+```{r}
+t.Furniture.RecallTime <- t.test(data.recallTime[data.recallTime["Furniture"]=="HasFurniture",5], data.recallTime[data.recallTime['Furniture']=="NoFurniture",5])
+t.Furniture.RecallTime
+```
+From the Unpaired T Test above, we can see that there is no significant effect on Recall time between two furniture conditions.
+
+#### Visualisation
+```{r}
+d <- Rmisc::summarySE(data.recallTime, measurevar = "AnswerTime", groupvars = c("Furniture"))
+d
+ggplot(d, aes(x = Furniture, y = AnswerTime, fill = Furniture)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=AnswerTime-ci, ymax=AnswerTime+ci)) + scale_fill_manual(values=c("#66c2a5", "#fc8d62"))
+```
+
+### Analysis of Layout Factor
+#### Unpaired T Test
+```{r}
+t.Layout.RecallTime <- t.test(data.recallTime[data.recallTime["Layout"]=="Regular",5], data.recallTime[data.recallTime['Layout']=="Irregular",5])
+t.Layout.RecallTime
+```
+From the Unpaired T Test above, we can see that there is no significant effect on Recall time between two layout conditions.
+
+#### Visualisation
+```{r}
+d <- Rmisc::summarySE(data.recallTime, measurevar = "AnswerTime", groupvars = c("Layout"))
+d
+ggplot(d, aes(x = Layout, y = AnswerTime, fill = Layout)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=AnswerTime-ci, ymax=AnswerTime+ci)) + scale_fill_manual(values=c("#8da0cb", "#e78ac3"))
+```
+
+### Analysis of Four Conditions
+#### Check Homogenity
+```{r}
+bartlett.test(AnswerTime ~ Condition, data = data.recallTime)
+```
+From the output, it can be seen that the p-value of **0.5888** is not less than the significance level of 0.05. This means that there is no evidence to suggest that the variance in **Recall Time** is statistically significantly different among different **conditions**. Thus, we can assume the homogenity. 
+
+#### One-way Repeated measures ANOVA
+```{r}
+aov <- aov(AnswerTime ~ Condition, data.recallTime)
+summary(aov)
+```
+From the one-way repeated measures ANOVA results above, we cannot find a strong significant main effect **among the four conditions (p = 0.738)**.
+
+#### Visualisation
+```{r}
+d <- Rmisc::summarySE(data.recallTime, measurevar = "AnswerTime", groupvars = c("Condition"))
+ggplot(d, aes(x = Condition, y = AnswerTime, fill = Condition)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=AnswerTime-ci, ymax=AnswerTime+ci)) + scale_fill_manual(values=c("#e41a1c", "#377eb8", "#984ea3", "#ff7f00"))
+```
+
+## Recall Time Conclusion and Visualisation
+We don't find any evidence to suggest that the Furniture factor or Layout factor has a main effect on the Recall Time. 
+
+
+
+
+
+
+
+
+
+# Locomotion Results
+
+## R Libraries
+```{r}
+library(dplyr)
+library(ggpubr)
+library(rstatix)
+```
+
+## Load Locomotion data into global environment
+```{r}
+load("data.locomotion.furniture.Rdata")
+summary(data.locomotion.furniture)
+
+load("data.locomotion.layout.Rdata")
+summary(data.locomotion.layout)
+
+load("data.locomotion.condition.Rdata")
+summary(data.locomotion.condition)
+```
+
+## Furniture Factor Analysis
+
+### Check Outliers and remove them
+```{r}
+boxplot(data.locomotion.furniture$Rotation)
+boxplot(data.locomotion.furniture$Distance)
+
+Q <- quantile(data.locomotion.furniture$Distance, probs=c(.25, .75), na.rm = FALSE)
+iqr <- IQR(data.locomotion.furniture$Distance)
+up <-  Q[2]+1.5*iqr # Upper Range 
+
+data.locomotion.furniture.eliminated <- subset(data.locomotion.furniture, data.locomotion.furniture$Distance < up)
+summary(data.locomotion.furniture.eliminated)
+```
+
+### Check normality
+```{r}
+shapiro.test(data.locomotion.furniture.eliminated$Rotation) 
+shapiro.test(data.locomotion.furniture.eliminated$Distance) 
+```
+Both Rotation data and Distance data are normally distributed. So we use t test to compare the two groups in Furniture factor
+
+### An unpaired t test
+```{r}
+t.Furniture.Rotation <- t.test(data.locomotion.furniture.eliminated[data.locomotion.furniture.eliminated["Furniture"]=="Furniture",3], data.locomotion.furniture.eliminated[data.locomotion.furniture.eliminated['Furniture']=="NoFurniture",3])
+t.Furniture.Rotation
+
+t.Furniture.Distance <- t.test(data.locomotion.furniture.eliminated[data.locomotion.furniture.eliminated["Furniture"]=="Furniture",4], data.locomotion.furniture.eliminated[data.locomotion.furniture.eliminated['Furniture']=="NoFurniture",4])
+t.Furniture.Distance
+```
+With a Welch's t test, we found no significant effect for Furniture factor on Head Rotation and Walking Distance.
+
+### Visualisation
+```{r}
+d <- Rmisc::summarySE(data.locomotion.furniture.eliminated, measurevar = "Rotation", groupvars = c("Furniture"))
+ggplot(d, aes(x = Furniture, y = Rotation, fill = Furniture)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Rotation-ci, ymax=Rotation+ci)) + scale_fill_manual(values=c("#66c2a5", "#fc8d62"))
+
+d2 <- Rmisc::summarySE(data.locomotion.furniture.eliminated, measurevar = "Distance", groupvars = c("Furniture"))
+ggplot(d2, aes(x = Furniture, y = Distance, fill = Furniture)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Distance-ci, ymax=Distance+ci)) + scale_fill_manual(values=c("#66c2a5", "#fc8d62"))
+```
+## Layout Factor Analysis
+
+### Check Outliers and remove them
+```{r}
+boxplot(data.locomotion.layout$Rotation)
+boxplot(data.locomotion.layout$Distance)
+```
+
+### Check normality
+```{r}
+shapiro.test(data.locomotion.layout$Rotation) 
+shapiro.test(data.locomotion.layout$Distance) 
+```
+The Rotation data are normally distributed, while the distance data are not normally distributed. So we use t test to compare the two groups in Furniture factor for head rotations, while using Mann-Whitney's U test for walking distance.
+
+### A paired t test
+```{r}
+t.Layout.Rotation <- t.test(data.locomotion.layout[data.locomotion.layout["Layout"]=="Regular",3], data.locomotion.layout[data.locomotion.layout['Layout']=="Irregular",3], paired = T)
+t.Layout.Rotation
+```
+With a Welch's t test, we found no significant effect for Layout factor on Head Rotation.
+
+### A Mann-Whitney's U test
+```{r}
+W.Layout.Distance <- wilcox.test(data.locomotion.layout[data.locomotion.layout["Layout"]=="Regular",4], data.locomotion.layout[data.locomotion.layout['Layout']=="Irregular",4])
+W.Layout.Distance
+```
+With a Mann-Whitney's U test, we found no significant effect for Layout factor on Walking Distance.
+
+### Visualisation
+```{r}
+d <- Rmisc::summarySE(data.locomotion.layout, measurevar = "Rotation", groupvars = c("Layout"))
+ggplot(d, aes(x = Layout, y = Rotation, fill = Layout)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Rotation-ci, ymax=Rotation+ci)) + scale_fill_manual(values=c("#8da0cb", "#e78ac3"))
+
+d2 <- Rmisc::summarySE(data.locomotion.layout, measurevar = "Distance", groupvars = c("Layout"))
+ggplot(d2, aes(x = Layout, y = Distance, fill = Layout)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Distance-ci, ymax=Distance+ci)) + scale_fill_manual(values=c("#8da0cb", "#e78ac3"))
+```
+
+## Four Conditions Analysis
+
+### Check Outliers and remove them
+```{r}
+boxplot(data.locomotion.condition$Rotation)
+boxplot(data.locomotion.condition$Distance)
+
+Q <- quantile(data.locomotion.condition$Rotation, probs=c(.25, .75), na.rm = FALSE)
+iqr <- IQR(data.locomotion.condition$Rotation)
+up <-  Q[2]+1.5*iqr # Upper Range 
+
+data.locomotion.condition.eliminated <- subset(data.locomotion.condition, data.locomotion.condition$Rotation < up)
+
+
+Q2 <- quantile(data.locomotion.condition.eliminated$Distance, probs=c(.25, .75), na.rm = FALSE)
+iqr2 <- IQR(data.locomotion.condition.eliminated$Distance)
+up2 <-  Q2[2]+1.5*iqr2 # Upper Range 
+data.locomotion.condition.eliminated <- subset(data.locomotion.condition.eliminated, data.locomotion.condition.eliminated$Distance < up2)
+
+boxplot(data.locomotion.condition.eliminated$Rotation)
+boxplot(data.locomotion.condition.eliminated$Distance)
+```
+
+### Check normality
+```{r}
+shapiro.test(data.locomotion.condition.eliminated$Rotation) 
+shapiro.test(data.locomotion.condition.eliminated$Distance) 
+```
+Both Rotation and Distance data are not normally distributed. So we use ANOVA test of Aligned Rank Tranformed data for both dependent variables.
+
+### Use ART to transform data
+```{r}
+art.locomotion.Rotation <- art(Rotation ~ Condition + Error(PID), data = data.locomotion.condition.eliminated)
+art.locomotion.Distance <- art(Distance ~ Condition + Error(PID), data = data.locomotion.condition.eliminated)
+```
+
+### ANOVA test
+```{r}
+model.locomotion.Rotation <- anova(art.locomotion.Rotation)
+model.locomotion.Rotation$part.eta.sq = with(model.locomotion.Rotation, `Sum Sq`/(`Sum Sq` + `Sum Sq.res`))
+
+model.locomotion.Rotation
+
+model.locomotion.Distance <- anova(art.locomotion.Distance)
+model.locomotion.Distance$part.eta.sq = with(model.locomotion.Distance, `Sum Sq`/(`Sum Sq` + `Sum Sq.res`))
+
+model.locomotion.Distance
+```
+### Post-hoc comparisons for main effects
+```{r}
+marginal = art.con(art.locomotion.Rotation, "Condition")
+
+marginal
+```
+
+## Locomotion Conclusions and Visualisation
+```{r}
+d <- Rmisc::summarySE(data.locomotion.condition.eliminated, measurevar = "Rotation", groupvars = c("Condition"))
+ggplot(d, aes(x = Condition, y = Rotation, fill = Condition)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Rotation-ci, ymax=Rotation+ci)) + scale_fill_manual(values=c("#e41a1c", "#377eb8", "#984ea3", "#ff7f00"))
+
+d2 <- Rmisc::summarySE(data.locomotion.condition.eliminated, measurevar = "Distance", groupvars = c("Condition"))
+ggplot(d2, aes(x = Condition, y = Distance, fill = Condition)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Distance-ci, ymax=Distance+ci)) + scale_fill_manual(values=c("#e41a1c", "#377eb8", "#984ea3", "#ff7f00"))
+```
+From the ANOVA test of Aligned Ranked data and a post-hoc comparisons for the main effect, we find a significant difference between the Condition "NoFurniture-Irregular" and "NoFurniture-Regular" on the head rotation data. It tells us that when participants in a room without any furniture, they perform more head rotations on Regular layout than Irregular layout.

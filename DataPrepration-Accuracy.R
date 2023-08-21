@@ -5,25 +5,11 @@ library(tidyverse)
 ### Functions ###
 euclidean_dist <- function(x, y) sqrt(sum((x - y)^2))
 
-
 ### Pre-defined variables ###
 set.seed(593903)
 difficulty <- 5
 vectorDim <- 3
-removeDiscardedTrials <- TRUE
-removeDiscardedTrialsTimeout <- 30
-
-### initiate data frames for analysis
-AccuracyDF <- data.frame(
-  Participant = rep(c(1:16), each = 4),
-  Condition = rep(c("Has+Regular", "No+Irregular", "Has+Irregular", "No+Regular"), times = 16),
-  Furniture = rep(c("Has Furniture", "No Furniture", "Has Furniture", "No Furniture"), times = 16),
-  Layout = rep(c("Regular", "Irregular", "Irregular", "Regular"), times = 16),
-  Accuracy = rep(c(0), times = 64),
-  Accuracy_Modif = rep(c(0), times = 64),
-  EuclideanError = rep(c(0), times = 64)
-)
-
+data.accuracy.raw  <- data.frame()
 NoParticipant <- 0
 
 ### Loop for all participant files
@@ -44,7 +30,6 @@ for(par in 1:16){
     
     AccuracyResult <- c()
     EuclErrorResult <- c()
-    AccuracyResult_Modif <- c()
 
     ### Calculate interaction time
     InteractionFileSubset <- readInteractionFile[(readInteractionFile$Info == "Learning Phase" | readInteractionFile$Info == "Distractor") & readInteractionFile$TrialID != "Training",]
@@ -106,9 +91,6 @@ for(par in 1:16){
         }
       }
       
-      ### calculate modified accuracy
-      Usercards_Modif <- UserCards %% 12
-      TaskCards_Modif <- TaskCards %% 12
       
       ### Data into Array ###
       UserArray <- array(c(UserCard1,UserCard2,UserCard3,UserCard4,UserCard5), dim = c(vectorDim, difficulty))
@@ -140,173 +122,93 @@ for(par in 1:16){
         AccuracyResult <- c(AccuracyResult, (difficulty - length(UserDiffArray[1,])) / difficulty)
         EuclErrorResult <- c(EuclErrorResult, HungarianSolver(DistArray)$cost)
       }
-      
-      ### calculate modif accuracy
-      AccuracyResult_Modif <- c(AccuracyResult_Modif, (difficulty - length(match(setdiff(TaskCards_Modif,Usercards_Modif),TaskCards_Modif))) / difficulty)
     }
     
-    FinalResult <- data.frame(cbind(AccuracyResult, AccuracyResult_Modif, EuclErrorResult, timeCal))
-    
-################################## write to CSV for presentation ########################
-    #FinalResultTable <- rbind(c("NA", "NA", "NA"), FinalResult[1:5,], c("NA", "NA", "NA"), FinalResult[6:10,], c("NA", "NA", "NA"), FinalResult[11:15,], c("NA", "NA", "NA"), FinalResult[16:20,])
-    
-    #write.table(FinalResultTable, paste(c("../FinalResult_", par, ".csv"), collapse = ""), sep = ",", col.names = FALSE, row.names = FALSE)
-    
-################################## write to DataFrame for analysis #####################
-    Condition1DF <- FinalResult[1:5, ]
-    Condition2DF <- FinalResult[6:10, ]
-    Condition3DF <- FinalResult[11:15, ]
-    Condition4DF <- FinalResult[16:20, ]
-    
-    if(removeDiscardedTrials){
-      Condition1DF<- Condition1DF[Condition1DF$timeCal < removeDiscardedTrialsTimeout, ]
-      Condition2DF<- Condition2DF[Condition2DF$timeCal < removeDiscardedTrialsTimeout, ]
-      Condition3DF<- Condition3DF[Condition3DF$timeCal < removeDiscardedTrialsTimeout, ]
-      Condition4DF<- Condition4DF[Condition4DF$timeCal < removeDiscardedTrialsTimeout, ]
-    }
-
-    condition1Result_Accuracy <- mean(Condition1DF$AccuracyResult)
-    condition2Result_Accuracy <- mean(Condition2DF$AccuracyResult)
-    condition3Result_Accuracy <- mean(Condition3DF$AccuracyResult)
-    condition4Result_Accuracy <- mean(Condition4DF$AccuracyResult)
-    
-    condition1Result_Accuracy_Modif <- mean(Condition1DF$AccuracyResult_Modif)
-    condition2Result_Accuracy_Modif <- mean(Condition2DF$AccuracyResult_Modif)
-    condition3Result_Accuracy_Modif <- mean(Condition3DF$AccuracyResult_Modif)
-    condition4Result_Accuracy_Modif <- mean(Condition4DF$AccuracyResult_Modif)
-    
-    condition1Result_EuclError <- mean(Condition1DF$EuclErrorResult)
-    condition2Result_EuclError <- mean(Condition2DF$EuclErrorResult)
-    condition3Result_EuclError <- mean(Condition3DF$EuclErrorResult)
-    condition4Result_EuclError <- mean(Condition4DF$EuclErrorResult)
+    tmp <- data.frame(cbind(AccuracyResult, EuclErrorResult, timeCal))
+    tmp$PID <- NoParticipant
+    Condition1DF.tmp <- tmp[1:5, ]
+    Condition2DF.tmp  <- tmp[6:10, ]
+    Condition3DF.tmp  <- tmp[11:15, ]
+    Condition4DF.tmp  <- tmp[16:20, ]
     
     if(par %% 4 == 1){
-      AccuracyDF <- AccuracyDF %>%
-        mutate(Accuracy = replace(Accuracy, Participant == par & Furniture == "Has Furniture" & Layout == "Regular", condition1Result_Accuracy))
-      AccuracyDF <- AccuracyDF %>%
-        mutate(Accuracy = replace(Accuracy, Participant == par & Furniture == "No Furniture" & Layout == "Regular", condition2Result_Accuracy))
-      AccuracyDF <- AccuracyDF %>%
-        mutate(Accuracy = replace(Accuracy, Participant == par & Furniture == "Has Furniture" & Layout == "Irregular", condition3Result_Accuracy))
-      AccuracyDF <- AccuracyDF %>%
-        mutate(Accuracy = replace(Accuracy, Participant == par & Furniture == "No Furniture" & Layout == "Irregular", condition4Result_Accuracy))
+      Condition1DF.tmp$Furniture <- "Furniture"
+      Condition2DF.tmp$Furniture <- "NoFurniture"
+      Condition3DF.tmp$Furniture <- "Furniture"
+      Condition4DF.tmp$Furniture <- "NoFurniture"
       
-      AccuracyDF <- AccuracyDF %>%
-        mutate(Accuracy_Modif = replace(Accuracy_Modif, Participant == par & Furniture == "Has Furniture" & Layout == "Regular", condition1Result_Accuracy_Modif))
-      AccuracyDF <- AccuracyDF %>%
-        mutate(Accuracy_Modif = replace(Accuracy_Modif, Participant == par & Furniture == "No Furniture" & Layout == "Regular", condition2Result_Accuracy_Modif))
-      AccuracyDF <- AccuracyDF %>%
-        mutate(Accuracy_Modif = replace(Accuracy_Modif, Participant == par & Furniture == "Has Furniture" & Layout == "Irregular", condition3Result_Accuracy_Modif))
-      AccuracyDF <- AccuracyDF %>%
-        mutate(Accuracy_Modif = replace(Accuracy_Modif, Participant == par & Furniture == "No Furniture" & Layout == "Irregular", condition4Result_Accuracy_Modif))
+      Condition1DF.tmp$Layout <- "Regular"
+      Condition2DF.tmp$Layout <- "Regular"
+      Condition3DF.tmp$Layout <- "Irregular"
+      Condition4DF.tmp$Layout <- "Irregular"
       
-      AccuracyDF <- AccuracyDF %>%
-        mutate(EuclideanError = replace(EuclideanError, Participant == par & Furniture == "Has Furniture" & Layout == "Regular", condition1Result_EuclError))
-      AccuracyDF <- AccuracyDF %>%
-        mutate(EuclideanError = replace(EuclideanError, Participant == par & Furniture == "No Furniture" & Layout == "Regular", condition2Result_EuclError))
-      AccuracyDF <- AccuracyDF %>%
-        mutate(EuclideanError = replace(EuclideanError, Participant == par & Furniture == "Has Furniture" & Layout == "Irregular", condition3Result_EuclError))
-      AccuracyDF <- AccuracyDF %>%
-        mutate(EuclideanError = replace(EuclideanError, Participant == par & Furniture == "No Furniture" & Layout == "Irregular", condition4Result_EuclError))
+      Condition1DF.tmp$Condition <- "Furniture-Regular"
+      Condition2DF.tmp$Condition <- "NoFurniture-Regular"
+      Condition3DF.tmp$Condition <- "Furniture-Irregular"
+      Condition4DF.tmp$Condition <- "NoFurniture-Irregular"
     }else if(par %% 4 == 2){
-      AccuracyDF <- AccuracyDF %>%
-        mutate(Accuracy = replace(Accuracy, Participant == par & Furniture == "No Furniture" & Layout == "Regular", condition1Result_Accuracy))
-      AccuracyDF <- AccuracyDF %>%
-        mutate(Accuracy = replace(Accuracy, Participant == par & Furniture == "No Furniture" & Layout == "Irregular", condition2Result_Accuracy))
-      AccuracyDF <- AccuracyDF %>%
-        mutate(Accuracy = replace(Accuracy, Participant == par & Furniture == "Has Furniture" & Layout == "Regular", condition3Result_Accuracy))
-      AccuracyDF <- AccuracyDF %>%
-        mutate(Accuracy = replace(Accuracy, Participant == par & Furniture == "Has Furniture" & Layout == "Irregular", condition4Result_Accuracy))
-
-      AccuracyDF <- AccuracyDF %>%
-        mutate(Accuracy_Modif = replace(Accuracy_Modif, Participant == par & Furniture == "No Furniture" & Layout == "Regular", condition1Result_Accuracy_Modif))
-      AccuracyDF <- AccuracyDF %>%
-        mutate(Accuracy_Modif = replace(Accuracy_Modif, Participant == par & Furniture == "No Furniture" & Layout == "Irregular", condition2Result_Accuracy_Modif))
-      AccuracyDF <- AccuracyDF %>%
-        mutate(Accuracy_Modif = replace(Accuracy_Modif, Participant == par & Furniture == "Has Furniture" & Layout == "Regular", condition3Result_Accuracy_Modif))
-      AccuracyDF <- AccuracyDF %>%
-        mutate(Accuracy_Modif = replace(Accuracy_Modif, Participant == par & Furniture == "Has Furniture" & Layout == "Irregular", condition4Result_Accuracy_Modif))
+      Condition1DF.tmp$Furniture <- "NoFurniture"
+      Condition2DF.tmp$Furniture <- "NoFurniture"
+      Condition3DF.tmp$Furniture <- "Furniture"
+      Condition4DF.tmp$Furniture <- "Furniture"
       
-      AccuracyDF <- AccuracyDF %>%
-        mutate(EuclideanError = replace(EuclideanError, Participant == par & Furniture == "No Furniture" & Layout == "Regular", condition1Result_EuclError))
-      AccuracyDF <- AccuracyDF %>%
-        mutate(EuclideanError = replace(EuclideanError, Participant == par & Furniture == "No Furniture" & Layout == "Irregular", condition2Result_EuclError))
-      AccuracyDF <- AccuracyDF %>%
-        mutate(EuclideanError = replace(EuclideanError, Participant == par & Furniture == "Has Furniture" & Layout == "Regular", condition3Result_EuclError))
-      AccuracyDF <- AccuracyDF %>%
-        mutate(EuclideanError = replace(EuclideanError, Participant == par & Furniture == "Has Furniture" & Layout == "Irregular", condition4Result_EuclError))
+      Condition1DF.tmp$Layout <- "Regular"
+      Condition2DF.tmp$Layout <- "Irregular"
+      Condition3DF.tmp$Layout <- "Regular"
+      Condition4DF.tmp$Layout <- "Irregular"
+      
+      Condition1DF.tmp$Condition <- "NoFurniture-Regular"
+      Condition2DF.tmp$Condition <- "NoFurniture-Irregular"
+      Condition3DF.tmp$Condition <- "Furniture-Regular"
+      Condition4DF.tmp$Condition <- "Furniture-Irregular"
     }
     else if(par %% 4 == 3){
-      AccuracyDF <- AccuracyDF %>%
-        mutate(Accuracy = replace(Accuracy, Participant == par & Furniture == "Has Furniture" & Layout == "Irregular", condition1Result_Accuracy))
-      AccuracyDF <- AccuracyDF %>%
-        mutate(Accuracy = replace(Accuracy, Participant == par & Furniture == "Has Furniture" & Layout == "Regular", condition2Result_Accuracy))
-      AccuracyDF <- AccuracyDF %>%
-        mutate(Accuracy = replace(Accuracy, Participant == par & Furniture == "No Furniture" & Layout == "Irregular", condition3Result_Accuracy))
-      AccuracyDF <- AccuracyDF %>%
-        mutate(Accuracy = replace(Accuracy, Participant == par & Furniture == "No Furniture" & Layout == "Regular", condition4Result_Accuracy))
+      Condition1DF.tmp$Furniture <- "Furniture"
+      Condition2DF.tmp$Furniture <- "Furniture"
+      Condition3DF.tmp$Furniture <- "NoFurniture"
+      Condition4DF.tmp$Furniture <- "NoFurniture"
       
-      AccuracyDF <- AccuracyDF %>%
-        mutate(Accuracy_Modif = replace(Accuracy_Modif, Participant == par & Furniture == "Has Furniture" & Layout == "Irregular", condition1Result_Accuracy_Modif))
-      AccuracyDF <- AccuracyDF %>%
-        mutate(Accuracy_Modif = replace(Accuracy_Modif, Participant == par & Furniture == "Has Furniture" & Layout == "Regular", condition2Result_Accuracy_Modif))
-      AccuracyDF <- AccuracyDF %>%
-        mutate(Accuracy_Modif = replace(Accuracy_Modif, Participant == par & Furniture == "No Furniture" & Layout == "Irregular", condition3Result_Accuracy_Modif))
-      AccuracyDF <- AccuracyDF %>%
-        mutate(Accuracy_Modif = replace(Accuracy_Modif, Participant == par & Furniture == "No Furniture" & Layout == "Regular", condition4Result_Accuracy_Modif))
+      Condition1DF.tmp$Layout <- "Irregular"
+      Condition2DF.tmp$Layout <- "Regular"
+      Condition3DF.tmp$Layout <- "Irregular"
+      Condition4DF.tmp$Layout <- "Regular"
       
-      AccuracyDF <- AccuracyDF %>%
-        mutate(EuclideanError = replace(EuclideanError, Participant == par & Furniture == "Has Furniture" & Layout == "Irregular", condition1Result_EuclError))
-      AccuracyDF <- AccuracyDF %>%
-        mutate(EuclideanError = replace(EuclideanError, Participant == par & Furniture == "Has Furniture" & Layout == "Regular", condition2Result_EuclError))
-      AccuracyDF <- AccuracyDF %>%
-        mutate(EuclideanError = replace(EuclideanError, Participant == par & Furniture == "No Furniture" & Layout == "Irregular", condition3Result_EuclError))
-      AccuracyDF <- AccuracyDF %>%
-        mutate(EuclideanError = replace(EuclideanError, Participant == par & Furniture == "No Furniture" & Layout == "Regular", condition4Result_EuclError))
+      Condition1DF.tmp$Condition <- "Furniture-Irregular"
+      Condition2DF.tmp$Condition <- "Furniture-Regular"
+      Condition3DF.tmp$Condition <- "NoFurniture-Irregular"
+      Condition4DF.tmp$Condition <- "NoFurniture-Regular"
     }
     else if(par %% 4 == 0){
-      AccuracyDF <- AccuracyDF %>%
-        mutate(Accuracy = replace(Accuracy, Participant == par & Furniture == "No Furniture" & Layout == "Irregular", condition1Result_Accuracy))
-      AccuracyDF <- AccuracyDF %>%
-        mutate(Accuracy = replace(Accuracy, Participant == par & Furniture == "Has Furniture" & Layout == "Irregular", condition2Result_Accuracy))
-      AccuracyDF <- AccuracyDF %>%
-        mutate(Accuracy = replace(Accuracy, Participant == par & Furniture == "No Furniture" & Layout == "Regular", condition3Result_Accuracy))
-      AccuracyDF <- AccuracyDF %>%
-        mutate(Accuracy = replace(Accuracy, Participant == par & Furniture == "Has Furniture" & Layout == "Regular", condition4Result_Accuracy))
+      Condition1DF.tmp$Furniture <- "NoFurniture"
+      Condition2DF.tmp$Furniture <- "Furniture"
+      Condition3DF.tmp$Furniture <- "NoFurniture"
+      Condition4DF.tmp$Furniture <- "Furniture"
       
-      AccuracyDF <- AccuracyDF %>%
-        mutate(Accuracy_Modif = replace(Accuracy_Modif, Participant == par & Furniture == "No Furniture" & Layout == "Irregular", condition1Result_Accuracy_Modif))
-      AccuracyDF <- AccuracyDF %>%
-        mutate(Accuracy_Modif = replace(Accuracy_Modif, Participant == par & Furniture == "Has Furniture" & Layout == "Irregular", condition2Result_Accuracy_Modif))
-      AccuracyDF <- AccuracyDF %>%
-        mutate(Accuracy_Modif = replace(Accuracy_Modif, Participant == par & Furniture == "No Furniture" & Layout == "Regular", condition3Result_Accuracy_Modif))
-      AccuracyDF <- AccuracyDF %>%
-        mutate(Accuracy_Modif = replace(Accuracy_Modif, Participant == par & Furniture == "Has Furniture" & Layout == "Regular", condition4Result_Accuracy_Modif))
+      Condition1DF.tmp$Layout <- "Irregular"
+      Condition2DF.tmp$Layout <- "Irregular"
+      Condition3DF.tmp$Layout <- "Regular"
+      Condition4DF.tmp$Layout <- "Regular"
       
-      AccuracyDF <- AccuracyDF %>%
-        mutate(EuclideanError = replace(EuclideanError, Participant == par & Furniture == "No Furniture" & Layout == "Irregular", condition1Result_EuclError))
-      AccuracyDF <- AccuracyDF %>%
-        mutate(EuclideanError = replace(EuclideanError, Participant == par & Furniture == "Has Furniture" & Layout == "Irregular", condition2Result_EuclError))
-      AccuracyDF <- AccuracyDF %>%
-        mutate(EuclideanError = replace(EuclideanError, Participant == par & Furniture == "No Furniture" & Layout == "Regular", condition3Result_EuclError))
-      AccuracyDF <- AccuracyDF %>%
-        mutate(EuclideanError = replace(EuclideanError, Participant == par & Furniture == "Has Furniture" & Layout == "Regular", condition4Result_EuclError))
+      Condition1DF.tmp$Condition <- "NoFurniture-Irregular"
+      Condition2DF.tmp$Condition <- "Furniture-Irregular"
+      Condition3DF.tmp$Condition <- "NoFurniture-Regular"
+      Condition4DF.tmp$Condition <- "Furniture-Regular"
     }
+    
+    tmp <- rbind(Condition1DF.tmp, Condition2DF.tmp, Condition3DF.tmp, Condition4DF.tmp)
+    
+    tmp <- tmp %>% select(PID, Condition, Furniture, Layout, AccuracyResult, EuclErrorResult, timeCal)
+    colnames(tmp)[5] <- "Accuracy"
+    colnames(tmp)[6] <- "EuclideanError"
+    colnames(tmp)[7] <- "LearningTime"
+    data.accuracy.raw <- rbind(tmp, data.accuracy.raw)
   }
 }
 
-## remove non-participated rows
-data.accuracy <- AccuracyDF %>% mutate(Condition = as.factor(Condition), 
-                                              Furniture = as.factor(Furniture), 
-                                              Layout = as.factor(Layout))
-
-data.accuracy.female <- filter(data.accuracy, data.accuracy$Participant <= 8)
-data.accuracy.male  <- filter(data.accuracy, data.accuracy$Participant > 8)
-
-data.accuracy <- data.accuracy %>% mutate(Participant = as.factor(Participant))
-data.accuracy.female <- data.accuracy.female %>% mutate(Participant = as.factor(Participant))
-data.accuracy.male <- data.accuracy.male %>% mutate(Participant = as.factor(Participant))
+data.accuracy.raw <- data.accuracy.raw %>% mutate(PID = as.factor(PID),
+                                                  Condition = as.factor(Condition), 
+                                                  Furniture = as.factor(Furniture), 
+                                                  Layout = as.factor(Layout))
 
 setwd("~/R Projects/ARSpatialMemory-R")
-save(data.accuracy, file = "data.accuracy.Rdata")
-save(data.accuracy.female, file = "data.accuracy.female.Rdata")
-save(data.accuracy.male, file = "data.accuracy.male.Rdata")
+save(data.accuracy.raw, file = "data.accuracy.raw.Rdata")
