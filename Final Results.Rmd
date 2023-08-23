@@ -1,19 +1,25 @@
 ---
-title: "Data Analysis: Investigating Effects of Environmental Landmarks on Spatial Memory of Virtual Objects in Augmented Reality"
-author: "Last update: Anonymous"
+title: 'Data Analysis: Investigating Effects of Environmental Landmarks on Spatial
+  Memory of Virtual Objects in Augmented Reality'
+author: 'Last update: Anonymous'
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
-   html_notebook:
-      toc: true
-      toc_float: true
-      toc_depth: 5
-      number_sections: true
-      theme: united
-      highlight: tango
+  html_notebook:
+    toc: yes
+    toc_float: yes
+    toc_depth: 5
+    number_sections: yes
+    theme: united
+    highlight: tango
+  html_document:
+    toc: yes
+    toc_depth: '5'
+    df_print: paged
 ---
 
 # Accuracy Results
 We measured Accuracy and Euclidean Error from the experiment. The following R codes will illustrate the details of our quantitative analysis.
+
 ## R Libraries
 ```{r}
 library(ggplot2)
@@ -32,14 +38,19 @@ str(data.accuracy.raw)
 summary(data.accuracy.raw)
 ```
 By checking the raw data, we can see all 320 observations (16 participants * 2 Furniture conditions * 2 Layout conditions * 5 repetitions). We have one independent variable (condition), which can be further split into two independent variables (Furniture and Layout). We also have two dependent variables (Accuracy and Euclidean Error). At the end, we have tahe learning time recorded to see if any experiment trials are outliers.
+
 ## Data Wrangling
+
 ### Visualizing Outliers
+
 ```{r}
 boxplot(data.accuracy.raw[,5:6])
 boxplot(data.accuracy.raw$LearningTime)
 ```
 From the boxplots, we can see that Accuracy and Euclidean Error data have no outlier, but the Learning Time data have outliers. We will need to exclude those outliers which imply that participant didn't follow the experimental rule in those trials.
+
 ### Finding Outliers based on Learning Time
+
 ```{r}
 Q <- quantile(data.accuracy.raw$LearningTime, probs=c(.25, .75), na.rm = FALSE)
 iqr <- IQR(data.accuracy.raw$LearningTime)
@@ -48,14 +59,18 @@ outliers <- subset(data.accuracy.raw, data.accuracy.raw$LearningTime >= up)
 outliers
 ```
 We found 19 trials where participants spent more than expected time (> 35.3s) during the learning phase, causing the data not valid. We then remove those 19 trials from the raw data.
+
 ### Eliminating Outliers
+
 ```{r}
 data.accuracy.eliminated <- subset(data.accuracy.raw, data.accuracy.raw$LearningTime < up)
 str(data.accuracy.eliminated)
 summary(data.accuracy.eliminated)
 ```
 After removing, we have 301 observations left for further analysis.
+
 ### Aggregate Accuracy Data
+
 ```{r}
 data.accuracy = subset(data.accuracy.eliminated, select = -LearningTime)
 data.accuracy <- data.accuracy %>% group_by(PID, Condition) %>% mutate(Accuracy = mean(Accuracy), EuclideanError = mean(EuclideanError)) %>% ungroup()
@@ -65,7 +80,9 @@ data.accuracy.male  <- filter(data.accuracy, as.integer(data.accuracy$PID) > 8)
 summary(data.accuracy)
 ```
 Now, we have the aggregated dataset which contains the mean accuracy and euclidean error for each participant on each condition. Next, we will do some statistical analysis on this dataset.
+
 ### Test normality in the main dataset
+
 ```{r}
 shapiro.test(data.accuracy$Accuracy) 
 shapiro.test(data.accuracy$EuclideanError) 
@@ -74,6 +91,7 @@ We can clearly see from the result that p values are all < 0.05, which means tha
 
 ## Normal Accuracy Analysis
 The Normal Accuracy is calculated by the number of correct cards / 5. The correct card is measured if the user selected card matches the exact pattern card.
+
 ### Data Transformation using ARTools model
 ```{r}
 art.accuracy <- art(Accuracy ~ Furniture * Layout + Error(PID), data = data.accuracy)
@@ -82,7 +100,9 @@ art.accuracy.furniture <- art(Accuracy ~ Furniture + Error(PID), data = data.acc
 art.accuracy.layout <- art(Accuracy ~ Layout + Error(PID), data = data.accuracy)
 ```
 Now, we have four sub-models transformed by ARTools from the original data set for normal accuracy.
+
 ### Analysis of Two Factors combination
+
 #### Check Homogenity
 ```{r}
 bartlett.test(Accuracy ~ interaction(Furniture, Layout), data = data.accuracy)
@@ -97,7 +117,9 @@ model.accuracy$part.eta.sq = with(model.accuracy, `Sum Sq`/(`Sum Sq` + `Sum Sq.r
 model.accuracy
 ```
 From the two-way repeated measures ANOVA results above, we can see that only furniture has the significant main effect (p < 0.05). The effect size 0.09 is calculated using partial eta-squared, which implies a medium effect (0.06-0.14). 
+
 ### Analysis of Furniture Factor
+
 #### Check Homogenity
 ```{r}
 bartlett.test(Accuracy ~ Furniture, data = data.accuracy)
@@ -112,6 +134,7 @@ model.accuracy.furniture$part.eta.sq = with(model.accuracy.furniture, `Sum Sq`/(
 model.accuracy.furniture
 ```
 From the one-way repeated measures ANOVA results above, we can see that **furniture has the significant main effect (p < 0.05)**. The **effect size 0.09** is calculated using partial eta-squared, which implies a **medium effect (0.06-0.14)**. 
+
 #### Power Analysis
 ```{r}
 k=2
@@ -121,6 +144,7 @@ sig.level = 0.05
 pwr.anova.test(k, n, f, sig.level)
 ```
 A Post-hoc power calculations for balanced ANOVA test was conducted to determine the power of our tested study hypothesis, which compared Furniture to No Furniture conditions. The effect size of the study is 0.09 (partial eta-squared)/0.32 (Cohen's f) with 32 observations in two groups. The calculated power is 0.7.
+
 #### Visualisation
 ```{r}
 d <- Rmisc::summarySE(data.accuracy, measurevar = "Accuracy", groupvars = c("Furniture"))
@@ -129,6 +153,7 @@ ggplot(d, aes(x = Furniture, y = Accuracy, fill = Furniture)) + geom_bar(stat = 
 ```
 
 ### Analysis of Layout Factor
+
 #### Check Homogenity
 ```{r}
 bartlett.test(Accuracy ~ Layout, data = data.accuracy)
@@ -151,6 +176,7 @@ d
 ggplot(d, aes(x = Layout, y = Accuracy, fill = Layout)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Accuracy-ci, ymax=Accuracy+ci)) + scale_fill_manual(values=c("#8da0cb", "#e78ac3"))
 ```
 ### Analysis of Four Conditions
+
 #### Check Homogenity
 ```{r}
 bartlett.test(Accuracy ~ Condition, data = data.accuracy)
@@ -165,20 +191,16 @@ model.accuracy.condition$part.eta.sq = with(model.accuracy.condition, `Sum Sq`/(
 model.accuracy.condition
 ```
 From the one-way repeated measures ANOVA results above, we cannot find a strong significant main effect **among the four conditions (p = 0.08)**.
+
 #### Visualisation
 ```{r}
 d <- Rmisc::summarySE(data.accuracy, measurevar = "Accuracy", groupvars = c("Condition"))
 ggplot(d, aes(x = Condition, y = Accuracy, fill = Condition)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Accuracy-ci, ymax=Accuracy+ci)) + scale_fill_manual(values=c("#e41a1c", "#377eb8", "#984ea3", "#ff7f00"))
 ```
-## Conclusion for Normal Accuracy (Cards Incorrect)
-The data for the normal accuracy are not normally distributed. So we use the Aligned Rank Transform (ART) to transform our non-parametric data and turn them into ANOVA models. The data meet the assumption of homogeneity of variances. The one-way repeated measures ANOVA test shows a significant effect of the Furniture factor (p=0.035, effect size eta-squared=0.09) with a higher accuracy for Furniture condition (mean=0.57, sd=0.27) vs No Furniture condition (mean=0.50, sd=0.23). We don't find any evidence to suggest that the Layout factor has a main effect. Also, we don't find any evidence to suggest that the four conditions are significantly different. 
-
-
-
-
 
 ## Euclidean Distance Analysis
 The Euclidean Distance provides a secondary evaluation of the error measure. Whereas Cards Incorrect provides an absolute measure, Euclidean Distance rewards card selections by summing the distance from the selected cards to the correct ones via the Hungarian Algorithm. 
+
 ### Data Transformation using ARTools model
 ```{r}
 art.ee <- art(EuclideanError ~ Furniture * Layout + Error(PID), data = data.accuracy)
@@ -187,7 +209,9 @@ art.ee.layout <- art(EuclideanError ~ Layout + Error(PID), data = data.accuracy)
 art.ee.condition <- art(EuclideanError ~ Condition + Error(PID), data = data.accuracy)
 ```
 Now, we have four sub-models transformed by ARTools from the original data set for Euclidean Distance.
+
 ### Analysis of Two Factors combination
+
 #### Check Homogenity
 ```{r}
 bartlett.test(EuclideanError ~ interaction(Furniture, Layout), data = data.accuracy)
@@ -202,7 +226,9 @@ model.ee$part.eta.sq = with(model.ee, `Sum Sq`/(`Sum Sq` + `Sum Sq.res`))
 model.ee
 ```
 From the two-way repeated measures ANOVA results above, we cannot find any evidence to suggest a significant difference for any factors or combinations of factors. 
+
 ### Analysis of Furniture Factor
+
 #### Check Homogenity
 ```{r}
 bartlett.test(EuclideanError ~ Furniture, data = data.accuracy)
@@ -226,6 +252,7 @@ ggplot(d, aes(x = Furniture, y = EuclideanError, fill = Furniture)) + geom_bar(s
 ```
 
 ### Analysis of Layout Factor
+
 #### Check Homogenity
 ```{r}
 bartlett.test(EuclideanError ~ Layout, data = data.accuracy)
@@ -247,7 +274,9 @@ d <- Rmisc::summarySE(data.accuracy, measurevar = "EuclideanError", groupvars = 
 d
 ggplot(d, aes(x = Layout, y = EuclideanError, fill = Layout)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=EuclideanError-ci, ymax=EuclideanError+ci)) + scale_fill_manual(values=c("#8da0cb", "#e78ac3"))
 ```
+
 ### Analysis of Four Conditions
+
 #### Check Homogenity
 ```{r}
 bartlett.test(EuclideanError ~ Condition, data = data.accuracy)
@@ -262,14 +291,52 @@ model.ee.condition$part.eta.sq = with(model.ee.condition, `Sum Sq`/(`Sum Sq` + `
 model.ee.condition
 ```
 From the one-way repeated measures ANOVA results above, we cannot find a strong significant main effect **among the four conditions (p = 0.58)**.
+
 #### Visualisation
 ```{r}
 d <- Rmisc::summarySE(data.accuracy, measurevar = "EuclideanError", groupvars = c("Condition"))
 ggplot(d, aes(x = Condition, y = EuclideanError, fill = Condition)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=EuclideanError-ci, ymax=EuclideanError+ci)) + scale_fill_manual(values=c("#e41a1c", "#377eb8", "#984ea3", "#ff7f00"))
 ```
+
+## Gender Analysis
+
+### Testing Normality
+```{r}
+shapiro.test(data.accuracy.female$Accuracy) 
+shapiro.test(data.accuracy.male$Accuracy) 
+shapiro.test(data.accuracy.female$EuclideanError) 
+shapiro.test(data.accuracy.male$EuclideanError) 
+```
+Not all data are normally distributed, so we use non-parametric test. 
+
+### Wilcoxon Signed-rank test
+```{r}
+wilcox.test(data.accuracy.female$Accuracy, data.accuracy.male$Accuracy, paired=T)
+
+wilcox.test(data.accuracy.female$EuclideanError, data.accuracy.male$EuclideanError, paired=T)
+```
+
+## Conclusion for Normal Accuracy (Cards Incorrect)
+The data for the normal accuracy are not normally distributed. So we use the Aligned Rank Transform (ART) to transform our non-parametric data and turn them into ANOVA models. The data meet the assumption of homogeneity of variances. The one-way repeated measures ANOVA test shows a significant effect of the Furniture factor (p=0.035, effect size eta-squared=0.09) with a higher accuracy for Furniture condition (mean=0.57, sd=0.27) vs No Furniture condition (mean=0.50, sd=0.23). We don't find any evidence to suggest that the Layout factor has a main effect. Also, we don't find any evidence to suggest that the four conditions are significantly different. 
+
 ## Conclusion for Euclidean Distance
 The data for the Euclidean Distance are not normally distributed. So we use the Aligned Rank Transform (ART) to transform our non-parametric data and turn them into ANOVA models. The data meet the assumption of homogeneity of variances. Our results show that there is no evidence to suggest that Euclidean Distance measure is significant difference for any factor or combination of factors. 
 
+## Conclusion and Visualisation for Gender Effect
+```{r}
+data.accuracy.female$Gender <- "Female"
+data.accuracy.male$Gender <- "Male"
+data.gender.combination <- rbind(data.accuracy.female, data.accuracy.male)
+
+d1 <- Rmisc::summarySE(data.gender.combination, measurevar = "Accuracy", groupvars = c("Gender"))
+d1
+ggplot(d1, aes(x = Gender, y = Accuracy, fill = Gender)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Accuracy-ci, ymax=Accuracy+ci)) + scale_fill_manual(values=c("#d95f02", "#1b9e77"))
+
+d2 <- Rmisc::summarySE(data.gender.combination, measurevar = "EuclideanError", groupvars = c("Gender"))
+d2
+ggplot(d2, aes(x = Gender, y = EuclideanError, fill = Gender)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=EuclideanError-ci, ymax=EuclideanError+ci)) + scale_fill_manual(values=c("#d95f02", "#1b9e77"))
+```
+From the statistical analysis, we couldn't find any evidence for a significant effect of different gender on accuracy data. Female participants have slightly higher accuracy (mean=0.56, sd=0.24) than male participants (mean=0.51, sd=0.26). Female participants also have slightly lower Euclidean Error (mean=2.04, sd=1.2) than male participants (mean=2.23, sd=1.31). 
 
 # NASA-TLX Results
 
@@ -366,8 +433,8 @@ wilcox_test(Mental ~ factor(Condition), data=data.mental.condition[data.mental.c
 ```
 A post-hoc test using Wilcoxon tests with Bonferroni correction showed the significant differences between Condition "Furniture-Regular" and "NoFurniture-Irregular" (p < 0.05, r = 0.34).
 
-
 ## Physical Demands
+
 ### Check Normality
 ```{r}
 shapiro.test(data.subjective$Physical)
@@ -431,7 +498,6 @@ data.physical.condition %>% friedman_effsize(Physical ~ Condition | PID)
 ```
 The effect size (Kendall's W) is 0.21. It implies a small effect size.
 
-
 ```{r}
 pairwise.wilcox.test(data.physical.condition$Physical, data.physical.condition$Condition, p.adj="bonferroni", exact=F, paired=T)
 
@@ -440,10 +506,8 @@ wilcox_test(Physical ~ factor(Condition), data=data.physical.condition[data.phys
 ```
 A post-hoc test using Wilcoxon tests with Bonferroni correction showed the significant differences between Condition "Furniture-Regular" and "NoFurniture-Irregular" (p < 0.05, r = 0.32).
 
-
-
-
 ## Temporal Demands
+
 ### Check Normality
 ```{r}
 shapiro.test(data.subjective$Temporal)
@@ -498,9 +562,8 @@ friedman.test(y=data.temporal.condition$Temporal, groups=data.temporal.condition
 ```
 A Friedman's test revealed no significant effect of four conditions on Temporal Demands (chi-squared = 1.3, p = 0.7).
 
-
-
 ## Performance
+
 ### Check Normality
 ```{r}
 shapiro.test(data.subjective$Performance)
@@ -572,11 +635,8 @@ pairwise.wilcox.test(data.performance.condition$Performance, data.performance.co
 ```
 A post-hoc test using Wilcoxon tests with Bonferroni correction showed no significant differences among four conditions.
 
-
-
-
-
 ## Effort
+
 ### Check Normality
 ```{r}
 shapiro.test(data.subjective$Effort)
@@ -623,7 +683,6 @@ friedman.test(y=data.effort.layout$Effort, groups=data.effort.layout$Layout, blo
 ```
 A Friedman's test revealed no significant effect of Layout factor on Effort **(chi-squared = 1.9, p = 0.17)**.
 
-
 ### Addtional Analyse for Effort on the four conditions using Friedman's test
 Then, we use Friedman's test to analyse the four conditions.
 ```{r}
@@ -644,11 +703,8 @@ pairwise.wilcox.test(data.effort.condition$Effort, data.effort.condition$Conditi
 ```
 A post-hoc test using Wilcoxon tests with Bonferroni correction showed no significant differences among four conditions.
 
-
-
-
-
 ## Frustration
+
 ### Check Normality
 ```{r}
 shapiro.test(data.subjective$Frustration)
@@ -702,10 +758,6 @@ data.frustration.condition <- data.subjective %>% dplyr::group_by(PID, Condition
 friedman.test(y=data.frustration.condition$Frustration, groups=data.frustration.condition$Condition, blocks=data.frustration.condition$PID)
 ```
 A Friedman's test revealed no significant effect of four conditions on Frustration **(chi-squared = 6.5, p = 0.09)**.
-
-
-
-
 
 ## Mean NASA-TLX Score
 
@@ -786,10 +838,6 @@ wilcox_test(Mean ~ factor(Condition), data=data.mean.condition[data.mean.conditi
 ```
 A post-hoc test using Wilcoxon tests with Bonferroni correction showed a significant differences between Condition "Furniture-Regular" and "NoFurniture-Irregular" (p < 0.05, r = 0.39) and between Condition "NoFurniture-Irregular" and  "Furniture-Irregular" (p < 0.05, r = 0.31).
 
-
-
-
-
 ## NASA-TLX Conclusion and Visualisation
 ```{r}
 mean_Chart <- aggregate(cbind(Mental, Physical, Temporal, Performance, Effort, Frustration, Mean)~Furniture , data=data.subjective , mean)
@@ -816,6 +864,7 @@ From the additional analysis on the Furniture factor using Friedman's test, it s
 Particularly, by analysing the effects on the four conditions using Friedman's test and a post-hoc test using Wilcoxon tests with Bonferroni correction, we find significant differences between Condition **“Furniture-Regular”** and **“NoFurniture-Irregular”** on **Mental (p < 0.05, r = 0.34)**, **Physical (p < 0.05, r = 0.32)**, and **Overall mean (p < 0.05, r = 0.39)**. We also find dignificant differences between Condition **“NoFurniture-Irregular”** and **“Furniture-Irregular”** on the **Overall mean (p < 0.05, r = 0.31)**.
 
 # Participant Rating for different conditions
+
 ## Load cleaned Rating data into the global environment
 ```{r}
 load("data.rating.Rdata")
@@ -830,14 +879,17 @@ p < 0.01, user rating data are not normally distributed. So we use ARTools to tr
 ```{r}
 art.rating.both <- art(Rating ~ Furniture * Layout + Error(PID), data = data.rating)
 ```
+
 ## Analyse Performance on the combination of two factors
 We first check the homogenity using bartlett's test.
+
 ### Check Homogenity
 ```{r}
 bartlett.test(Rating ~ interaction(Furniture,Layout), data = data.rating)
 ```
 
 From the output, it can be seen that the p-value of **0.2893** is not less than the significance level of 0.05. This means that there is no evidence to suggest that the variance in **User Rating** is statistically significantly different **among different factors or the combination of factors.** Thus, we can assume the homogenity.
+
 ### Two-way ANOVA
 ```{r}
 model.rating.both <- anova(art.rating.both)
@@ -878,7 +930,6 @@ friedman.test(y=data.rating.condition$Rating, groups=data.rating.condition$Condi
 ```
 A Friedman's test revealed a significant effect of four conditions on User Rating **(chi-squared = 13.1, p < 0.01)**.
 
-
 ```{r}
 data.rating.condition <- as.data.frame(data.rating.condition)
 data.rating.condition %>% friedman_effsize(Rating ~ Condition | PID)
@@ -896,7 +947,6 @@ wilcox_test(Rating ~ factor(Condition), data=data.rating.condition[data.rating.c
 ```
 A post-hoc test using Wilcoxon tests with Bonferroni correction showed a significant differences between Condition "Furniture-Regular" and "NoFurniture-Irregular" (p < 0.05, r = 0.67) and between Condition "NoFurniture-Irregular" and "Furniture-Irregular" (p < 0.05, r = 0.55).
 
-
 ## User Rating Conclusion and Visualisation
 ```{r}
 d <- Rmisc::summarySE(data.rating, measurevar = "Rating", groupvars = c("Condition"))
@@ -906,20 +956,8 @@ For the quantitative analysis on the User Ratings of two factors, we can see tha
 
 Another Friedman's test and a post-hoc Wilcoxon tests with Bonferroni correction on the User Ratings of four conditions shows that there is a significant differences between Condition **“Furniture-Regular”** and **“NoFurniture-Irregular”** **(p < 0.05, r = 0.67)** and between Condition **“NoFurniture-Irregular”** and **“Furniture-Irregular”** **(p < 0.05, r = 0.55)**.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 # Recall Time Results
+
 ## R Libraries
 ```{r}
 library(dplyr)
@@ -936,6 +974,7 @@ summary(data.recallTime.raw)
 ```
 
 ## Data Wrangling
+
 ### Visualizing Outliers
 ```{r}
 boxplot(data.recallTime.raw$AnswerTime)
@@ -975,6 +1014,7 @@ shapiro.test(data.recallTime$AnswerTime)
 We can clearly see from the result that p value is > 0.05, which means that the dataare normally distributed. So, we use ANOVA test for different dependent variables.
 
 ### Analysis of Two Factors combination
+
 #### Check Homogenity
 ```{r}
 bartlett.test(AnswerTime ~ interaction(Furniture, Layout), data = data.recallTime)
@@ -990,6 +1030,7 @@ summary(model.recallTime)
 From the two-way repeated measures ANOVA results above, we can see that there is no significant effects for any of the factors or combinations of the factors. 
 
 ### Analysis of Furniture Factor
+
 #### Unpaired T Test
 ```{r}
 t.Furniture.RecallTime <- t.test(data.recallTime[data.recallTime["Furniture"]=="HasFurniture",5], data.recallTime[data.recallTime['Furniture']=="NoFurniture",5])
@@ -1005,6 +1046,7 @@ ggplot(d, aes(x = Furniture, y = AnswerTime, fill = Furniture)) + geom_bar(stat 
 ```
 
 ### Analysis of Layout Factor
+
 #### Unpaired T Test
 ```{r}
 t.Layout.RecallTime <- t.test(data.recallTime[data.recallTime["Layout"]=="Regular",5], data.recallTime[data.recallTime['Layout']=="Irregular",5])
@@ -1020,6 +1062,7 @@ ggplot(d, aes(x = Layout, y = AnswerTime, fill = Layout)) + geom_bar(stat = "ide
 ```
 
 ### Analysis of Four Conditions
+
 #### Check Homogenity
 ```{r}
 bartlett.test(AnswerTime ~ Condition, data = data.recallTime)
@@ -1041,14 +1084,6 @@ ggplot(d, aes(x = Condition, y = AnswerTime, fill = Condition)) + geom_bar(stat 
 
 ## Recall Time Conclusion and Visualisation
 We don't find any evidence to suggest that the Furniture factor or Layout factor has a main effect on the Recall Time. 
-
-
-
-
-
-
-
-
 
 # Locomotion Results
 
