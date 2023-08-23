@@ -1242,9 +1242,11 @@ marginal
 ## Locomotion Conclusions and Visualisation
 ```{r}
 d <- Rmisc::summarySE(data.locomotion.condition.eliminated, measurevar = "Rotation", groupvars = c("Condition"))
+d
 ggplot(d, aes(x = Condition, y = Rotation, fill = Condition)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Rotation-ci, ymax=Rotation+ci)) + scale_fill_manual(values=c("#e41a1c", "#377eb8", "#984ea3", "#ff7f00"))
 
 d2 <- Rmisc::summarySE(data.locomotion.condition.eliminated, measurevar = "Distance", groupvars = c("Condition"))
+
 ggplot(d2, aes(x = Condition, y = Distance, fill = Condition)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Distance-ci, ymax=Distance+ci)) + scale_fill_manual(values=c("#e41a1c", "#377eb8", "#984ea3", "#ff7f00"))
 ```
 From the ANOVA test of Aligned Ranked data and a post-hoc comparisons for the main effect, we find a significant difference between the Condition "NoFurniture-Irregular" and "NoFurniture-Regular" on the head rotation data. It tells us that when participants in a room without any furniture, they perform more head rotations on Regular layout than Irregular layout.
