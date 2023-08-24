@@ -861,7 +861,7 @@ For the NASA-TLX result analysis on the Furniture factor, the ANOVA test of Alig
 
 From the additional analysis on the Furniture factor using Friedman's test, it shows significant effects for **Mental (p < 0.05, chi-squared = 5.3, effect size Kendall’s W = 0.33)**, **Physical (p < 0.01, chi-squared = 5.3, effect size Kendall’s W = 0.46)**, **Performance (p < 0.05, chi-squared = 6.2, effect size Kendall’s W = 0.39)**, and **overall mean (p < 0.05, chi-squared = 4, effect size Kendall’s W = 0.25)**. The results further proves that the participants perform the best in the Furniture condition with the least mental and physical effort.
 
-Particularly, by analysing the effects on the four conditions using Friedman's test and a post-hoc test using Wilcoxon tests with Bonferroni correction, we find significant differences between Condition **“Furniture-Regular”** and **“NoFurniture-Irregular”** on **Mental (p < 0.05, r = 0.34)**, **Physical (p < 0.05, r = 0.32)**, and **Overall mean (p < 0.05, r = 0.39)**. We also find dignificant differences between Condition **“NoFurniture-Irregular”** and **“Furniture-Irregular”** on the **Overall mean (p < 0.05, r = 0.31)**.
+Particularly, by analysing the effects on the four conditions using Friedman's test and a post-hoc test using Wilcoxon tests with Bonferroni correction, we find significant differences between Condition **“Furniture-Regular”** and **“NoFurniture-Irregular”** on **Mental (p < 0.05, r = 0.34)**, **Physical (p < 0.05, r = 0.32)**, and **Overall mean (p < 0.05, r = 0.39)**. We also find significant differences between Condition **“NoFurniture-Irregular”** and **“Furniture-Irregular”** on the **Overall mean (p < 0.05, r = 0.31)**.
 
 # Participant Rating for different conditions
 
