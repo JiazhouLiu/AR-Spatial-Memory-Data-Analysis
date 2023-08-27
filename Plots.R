@@ -1,27 +1,44 @@
+error.bar <- function(x, y, upper, lower=upper, length=0.1,...){
+  arrows(x,y+upper, x, y-lower, angle=90, code=3, length=length, ...)
+}
+
 data.accuracy$CardsIncorrect <- 1 - data.accuracy$Accuracy
 
 d <- Rmisc::summarySE(data.accuracy, measurevar = "CardsIncorrect", groupvars = c("Furniture"))
-ggplot(d, aes(x = Furniture, y = CardsIncorrect, fill = Furniture)) + geom_bar(stat = "identity") + 
-  geom_errorbar(aes(ymin=CardsIncorrect-ci, ymax=CardsIncorrect+ci)) + scale_fill_manual(values=c("#66c2a5", "#fc8d62")) + 
-  labs(y = "Cards Incorrect", x = "")
+ggplot(d, aes(x = Furniture, y = CardsIncorrect, fill = Furniture)) + 
+  geom_bar(stat = "identity", show.legend = FALSE) + 
+  geom_errorbar(aes(ymin=CardsIncorrect-se, ymax=CardsIncorrect+se), width = 0.4, alpha=0.9) + 
+  scale_fill_manual(values=c("#66c2a5", "#fc8d62")) + 
+  labs(y = "Cards Incorrect", x = "") + 
+  theme_minimal()
+
 
 ######################################################
 d <- Rmisc::summarySE(data.accuracy, measurevar = "CardsIncorrect", groupvars = c("Condition"))
-ggplot(d, aes(x = Condition, y = CardsIncorrect, fill = Condition)) + geom_bar(stat = "identity") + 
-  geom_errorbar(aes(ymin=CardsIncorrect-ci, ymax=CardsIncorrect+ci)) + scale_fill_manual(values=c("#e41a1c", "#377eb8", "#984ea3", "#ff7f00")) + 
-  labs(y = "Cards Incorrect", x = "")
+ggplot(d, aes(x = Condition, y = CardsIncorrect, fill = Condition)) + 
+  geom_bar(stat = "identity", show.legend = FALSE) + 
+  geom_errorbar(aes(ymin=CardsIncorrect-se, ymax=CardsIncorrect+se), width = 0.4, alpha=0.9) + 
+  scale_fill_manual(values=c("#e41a1c", "#377eb8", "#984ea3", "#ff7f00")) + 
+  labs(y = "Cards Incorrect", x = "") + 
+  theme_minimal()
 
 ######################################################
 d <- Rmisc::summarySE(data.accuracy, measurevar = "EuclideanError", groupvars = c("Furniture"))
-ggplot(d, aes(x = Furniture, y = EuclideanError, fill = Furniture)) + geom_bar(stat = "identity") + 
-  geom_errorbar(aes(ymin=EuclideanError-ci, ymax=EuclideanError+ci)) + scale_fill_manual(values=c("#66c2a5", "#fc8d62"))+ 
-  labs(y = "Euclidean Distance Error", x = "")
+ggplot(d, aes(x = Furniture, y = EuclideanError, fill = Furniture)) + 
+  geom_bar(stat = "identity", show.legend = FALSE) + 
+  geom_errorbar(aes(ymin=EuclideanError-se, ymax=EuclideanError+se), width = 0.4, alpha=0.9) + 
+  scale_fill_manual(values=c("#66c2a5", "#fc8d62"))+ 
+  labs(y = "Euclidean Distance Error", x = "") + 
+  theme_minimal()
 
 ######################################################
 d <- Rmisc::summarySE(data.accuracy, measurevar = "EuclideanError", groupvars = c("Condition"))
-ggplot(d, aes(x = Condition, y = EuclideanError, fill = Condition)) + geom_bar(stat = "identity") + 
-  geom_errorbar(aes(ymin=EuclideanError-ci, ymax=EuclideanError+ci)) + scale_fill_manual(values=c("#e41a1c", "#377eb8", "#984ea3", "#ff7f00"))+ 
-  labs(y = "Euclidean Distance Error", x = "")
+ggplot(d, aes(x = Condition, y = EuclideanError, fill = Condition)) + 
+  geom_bar(stat = "identity", show.legend = FALSE) + 
+  geom_errorbar(aes(ymin=EuclideanError-se, ymax=EuclideanError+se), width = 0.4, alpha=0.9) + 
+  scale_fill_manual(values=c("#e41a1c", "#377eb8", "#984ea3", "#ff7f00"))+ 
+  labs(y = "Euclidean Distance Error", x = "") + 
+  theme_minimal()
 
 
 ######################################################
@@ -62,19 +79,28 @@ error.bar(ze_barplot, mean_Chart, se_Baseline)
 
 ######################################################
 d <- Rmisc::summarySE(data.rating, measurevar = "Rating", groupvars = c("Furniture"))
-ggplot(d, aes(x = Furniture, y = Rating, fill = Furniture)) + geom_bar(stat = "identity") + 
-  geom_errorbar(aes(ymin=Rating-ci, ymax=Rating+ci)) + scale_fill_manual(values=c("#66c2a5", "#fc8d62"))+ 
-  labs(y = "User Rating", x = "")
+ggplot(d, aes(x = Furniture, y = Rating, fill = Furniture)) + 
+  geom_bar(stat = "identity", show.legend = FALSE) + 
+  geom_errorbar(aes(ymin=Rating-se, ymax=Rating+se), width = 0.4, alpha=0.9) + 
+  scale_fill_manual(values=c("#66c2a5", "#fc8d62"))+ 
+  labs(y = "User Rating", x = "") + 
+  theme_minimal()
 
 
 ######################################################
 d <- Rmisc::summarySE(data.rating, measurevar = "Rating", groupvars = c("Condition"))
-ggplot(d, aes(x = Condition, y = Rating, fill = Condition)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Rating-ci, ymax=Rating+ci)) + 
+ggplot(d, aes(x = Condition, y = Rating, fill = Condition)) + 
+  geom_bar(stat = "identity", show.legend = FALSE) + 
+  geom_errorbar(aes(ymin=Rating-se, ymax=Rating+se), width = 0.4, alpha=0.9) + 
   scale_fill_manual(values=c("#e41a1c", "#377eb8", "#984ea3", "#ff7f00"))+ 
-  labs(y = "User Rating", x = "")
+  labs(y = "User Rating", x = "") + 
+  theme_minimal()
 
 ######################################################
 d <- Rmisc::summarySE(data.locomotion.condition.eliminated, measurevar = "Rotation", groupvars = c("Condition"))
-ggplot(d, aes(x = Condition, y = Rotation, fill = Condition)) + geom_bar(stat = "identity") + 
-  geom_errorbar(aes(ymin=Rotation-ci, ymax=Rotation+ci)) + scale_fill_manual(values=c("#e41a1c", "#377eb8", "#984ea3", "#ff7f00"))+ 
-  labs(y = "Head Rotation", x = "")
+ggplot(d, aes(x = Condition, y = Rotation, fill = Condition)) + 
+  geom_bar(stat = "identity", show.legend = FALSE) + 
+  geom_errorbar(aes(ymin=Rotation-se, ymax=Rotation+se), width = 0.4, alpha=0.9) + 
+  scale_fill_manual(values=c("#e41a1c", "#377eb8", "#984ea3", "#ff7f00"))+ 
+  labs(y = "Head Rotation", x = "") + 
+  theme_minimal()
