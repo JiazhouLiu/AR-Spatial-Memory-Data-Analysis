@@ -1092,58 +1092,87 @@ We don't find any evidence to suggest that the Furniture factor or Layout factor
 library(dplyr)
 library(ggpubr)
 library(rstatix)
+library(ARTool)
 ```
 
 ## Load Locomotion data into global environment
 ```{r}
-load("data.locomotion.furniture.Rdata")
-summary(data.locomotion.furniture)
+load("data.locomotion.furniture.learning.Rdata")
+summary(data.locomotion.furniture.learning)
+load("data.locomotion.furniture.recall.Rdata")
+summary(data.locomotion.furniture.recall)
 
 load("data.locomotion.layout.Rdata")
 summary(data.locomotion.layout)
 
-load("data.locomotion.condition.Rdata")
-summary(data.locomotion.condition)
+load("data.locomotion.condition.learning.Rdata")
+summary(data.locomotion.condition.learning)
+load("data.locomotion.condition.recall.Rdata")
+summary(data.locomotion.condition.recall)
 ```
 
 ## Furniture Factor Analysis
 
 ### Check Outliers and remove them
 ```{r}
-boxplot(data.locomotion.furniture$Rotation)
-boxplot(data.locomotion.furniture$Distance)
+boxplot(data.locomotion.furniture.learning$Rotation)
+boxplot(data.locomotion.furniture.learning$Distance)
 
-Q <- quantile(data.locomotion.furniture$Distance, probs=c(.25, .75), na.rm = FALSE)
-iqr <- IQR(data.locomotion.furniture$Distance)
+Q <- quantile(data.locomotion.furniture.learning$Distance, probs=c(.25, .75), na.rm = FALSE)
+iqr <- IQR(data.locomotion.furniture.learning$Distance)
 up <-  Q[2]+1.5*iqr # Upper Range 
 
-data.locomotion.furniture.eliminated <- subset(data.locomotion.furniture, data.locomotion.furniture$Distance < up)
-summary(data.locomotion.furniture.eliminated)
+data.locomotion.furniture.learning.eliminated <- subset(data.locomotion.furniture.learning, data.locomotion.furniture.learning$Distance < up)
+summary(data.locomotion.furniture.learning.eliminated)
+
+boxplot(data.locomotion.furniture.recall$Rotation)
+boxplot(data.locomotion.furniture.recall$Distance)
+
+Q <- quantile(data.locomotion.furniture.recall$Distance, probs=c(.25, .75), na.rm = FALSE)
+iqr <- IQR(data.locomotion.furniture.recall$Distance)
+up <-  Q[2]+1.5*iqr # Upper Range 
+
+data.locomotion.furniture.recall.eliminated <- subset(data.locomotion.furniture.recall, data.locomotion.furniture.recall$Distance < up)
+summary(data.locomotion.furniture.recall.eliminated)
 ```
 
 ### Check normality
 ```{r}
-shapiro.test(data.locomotion.furniture.eliminated$Rotation) 
-shapiro.test(data.locomotion.furniture.eliminated$Distance) 
+shapiro.test(data.locomotion.furniture.learning.eliminated$Rotation) 
+shapiro.test(data.locomotion.furniture.learning.eliminated$Distance) 
+shapiro.test(data.locomotion.furniture.recall.eliminated$Rotation) 
+shapiro.test(data.locomotion.furniture.recall.eliminated$Distance) 
 ```
 Both Rotation data and Distance data are normally distributed. So we use t test to compare the two groups in Furniture factor
 
 ### An unpaired t test
 ```{r}
-t.Furniture.Rotation <- t.test(data.locomotion.furniture.eliminated[data.locomotion.furniture.eliminated["Furniture"]=="Furniture",3], data.locomotion.furniture.eliminated[data.locomotion.furniture.eliminated['Furniture']=="NoFurniture",3])
-t.Furniture.Rotation
+t.Furniture.learning.Rotation <- t.test(data.locomotion.furniture.learning.eliminated[data.locomotion.furniture.learning.eliminated["Furniture"]=="Furniture",3], data.locomotion.furniture.learning.eliminated[data.locomotion.furniture.learning.eliminated['Furniture']=="NoFurniture",3])
+t.Furniture.learning.Rotation
 
-t.Furniture.Distance <- t.test(data.locomotion.furniture.eliminated[data.locomotion.furniture.eliminated["Furniture"]=="Furniture",4], data.locomotion.furniture.eliminated[data.locomotion.furniture.eliminated['Furniture']=="NoFurniture",4])
-t.Furniture.Distance
+t.Furniture.learning.Distance <- t.test(data.locomotion.furniture.learning.eliminated[data.locomotion.furniture.learning.eliminated["Furniture"]=="Furniture",4], data.locomotion.furniture.learning.eliminated[data.locomotion.furniture.learning.eliminated['Furniture']=="NoFurniture",4])
+t.Furniture.learning.Distance
+
+t.Furniture.recall.Rotation <- t.test(data.locomotion.furniture.recall.eliminated[data.locomotion.furniture.recall.eliminated["Furniture"]=="Furniture",3], data.locomotion.furniture.recall.eliminated[data.locomotion.furniture.recall.eliminated['Furniture']=="NoFurniture",3])
+t.Furniture.recall.Rotation
+
+t.Furniture.recall.Distance <- t.test(data.locomotion.furniture.recall.eliminated[data.locomotion.furniture.recall.eliminated["Furniture"]=="Furniture",4], data.locomotion.furniture.recall.eliminated[data.locomotion.furniture.recall.eliminated['Furniture']=="NoFurniture",4])
+t.Furniture.recall.Distance
 ```
 With a Welch's t test, we found no significant effect for Furniture factor on Head Rotation and Walking Distance.
 
 ### Visualisation
 ```{r}
-d <- Rmisc::summarySE(data.locomotion.furniture.eliminated, measurevar = "Rotation", groupvars = c("Furniture"))
+d <- Rmisc::summarySE(data.locomotion.furniture.learning.eliminated, measurevar = "Rotation", groupvars = c("Furniture"))
 ggplot(d, aes(x = Furniture, y = Rotation, fill = Furniture)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Rotation-ci, ymax=Rotation+ci)) + scale_fill_manual(values=c("#66c2a5", "#fc8d62"))
 
-d2 <- Rmisc::summarySE(data.locomotion.furniture.eliminated, measurevar = "Distance", groupvars = c("Furniture"))
+d2 <- Rmisc::summarySE(data.locomotion.furniture.learning.eliminated, measurevar = "Distance", groupvars = c("Furniture"))
+ggplot(d2, aes(x = Furniture, y = Distance, fill = Furniture)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Distance-ci, ymax=Distance+ci)) + scale_fill_manual(values=c("#66c2a5", "#fc8d62"))
+
+d3 <- Rmisc::summarySE(data.locomotion.furniture.recall.eliminated, measurevar = "Rotation", groupvars = c("Furniture"))
+ggplot(d, aes(x = Furniture, y = Rotation, fill = Furniture)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Rotation-ci, ymax=Rotation+ci)) + scale_fill_manual(values=c("#66c2a5", "#fc8d62"))
+
+d4 <- Rmisc::summarySE(data.locomotion.furniture.recall.eliminated, measurevar = "Distance", groupvars = c("Furniture"))
 ggplot(d2, aes(x = Furniture, y = Distance, fill = Furniture)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Distance-ci, ymax=Distance+ci)) + scale_fill_manual(values=c("#66c2a5", "#fc8d62"))
 ```
 ## Layout Factor Analysis
@@ -1188,50 +1217,74 @@ ggplot(d2, aes(x = Layout, y = Distance, fill = Layout)) + geom_bar(stat = "iden
 
 ### Check Outliers and remove them
 ```{r}
-boxplot(data.locomotion.condition$Rotation)
-boxplot(data.locomotion.condition$Distance)
+boxplot(data.locomotion.condition.learning$Rotation)
+boxplot(data.locomotion.condition.learning$Distance)
 
-Q <- quantile(data.locomotion.condition$Rotation, probs=c(.25, .75), na.rm = FALSE)
-iqr <- IQR(data.locomotion.condition$Rotation)
+Q <- quantile(data.locomotion.condition.learning$Rotation, probs=c(.25, .75), na.rm = FALSE)
+iqr <- IQR(data.locomotion.condition.learning$Rotation)
 up <-  Q[2]+1.5*iqr # Upper Range 
 
-data.locomotion.condition.eliminated <- subset(data.locomotion.condition, data.locomotion.condition$Rotation < up)
+data.locomotion.condition.learning.eliminated <- subset(data.locomotion.condition.learning, data.locomotion.condition.learning$Rotation < up)
 
 
-Q2 <- quantile(data.locomotion.condition.eliminated$Distance, probs=c(.25, .75), na.rm = FALSE)
-iqr2 <- IQR(data.locomotion.condition.eliminated$Distance)
+Q2 <- quantile(data.locomotion.condition.learning.eliminated$Distance, probs=c(.25, .75), na.rm = FALSE)
+iqr2 <- IQR(data.locomotion.condition.learning.eliminated$Distance)
 up2 <-  Q2[2]+1.5*iqr2 # Upper Range 
-data.locomotion.condition.eliminated <- subset(data.locomotion.condition.eliminated, data.locomotion.condition.eliminated$Distance < up2)
+data.locomotion.condition.learning.eliminated <- subset(data.locomotion.condition.learning.eliminated, data.locomotion.condition.learning.eliminated$Distance < up2)
 
-boxplot(data.locomotion.condition.eliminated$Rotation)
-boxplot(data.locomotion.condition.eliminated$Distance)
+boxplot(data.locomotion.condition.recall$Rotation)
+boxplot(data.locomotion.condition.recall$Distance)
+
+Q3 <- quantile(data.locomotion.condition.recall$Rotation, probs=c(.25, .75), na.rm = FALSE)
+iqr3 <- IQR(data.locomotion.condition.recall$Rotation)
+up3 <-  Q3[2]+1.5*iqr3 # Upper Range 
+
+data.locomotion.condition.recall.eliminated <- subset(data.locomotion.condition.recall, data.locomotion.condition.recall$Rotation < up3)
+
+
+Q4 <- quantile(data.locomotion.condition.recall.eliminated$Distance, probs=c(.25, .75), na.rm = FALSE)
+iqr4 <- IQR(data.locomotion.condition.recall.eliminated$Distance)
+up4 <-  Q4[2]+1.5*iqr4 # Upper Range 
+data.locomotion.condition.recall.eliminated <- subset(data.locomotion.condition.recall.eliminated, data.locomotion.condition.recall.eliminated$Distance < up4)
 ```
 
 ### Check normality
 ```{r}
-shapiro.test(data.locomotion.condition.eliminated$Rotation) 
-shapiro.test(data.locomotion.condition.eliminated$Distance) 
+shapiro.test(data.locomotion.condition.learning.eliminated$Rotation) 
+shapiro.test(data.locomotion.condition.learning.eliminated$Distance) 
+
+shapiro.test(data.locomotion.condition.recall.eliminated$Rotation) 
+shapiro.test(data.locomotion.condition.recall.eliminated$Distance) 
 ```
 Both Rotation and Distance data are not normally distributed. So we use ANOVA test of Aligned Rank Tranformed data for both dependent variables.
 
 ### Use ART to transform data
 ```{r}
-art.locomotion.Rotation <- art(Rotation ~ Condition + Error(PID), data = data.locomotion.condition.eliminated)
-art.locomotion.Distance <- art(Distance ~ Condition + Error(PID), data = data.locomotion.condition.eliminated)
+art.locomotion.learning.Rotation <- art(Rotation ~ Condition + Error(PID), data = data.locomotion.condition.learning.eliminated)
+art.locomotion.learning.Distance <- art(Distance ~ Condition + Error(PID), data = data.locomotion.condition.learning.eliminated)
+
+art.locomotion.recall.Distance <- art(Distance ~ Condition + Error(PID), data = data.locomotion.condition.recall.eliminated)
 ```
 
 ### ANOVA test
 ```{r}
-model.locomotion.Rotation <- anova(art.locomotion.Rotation)
-model.locomotion.Rotation$part.eta.sq = with(model.locomotion.Rotation, `Sum Sq`/(`Sum Sq` + `Sum Sq.res`))
+model.locomotion.learning.Rotation <- anova(art.locomotion.learning.Rotation)
+model.locomotion.learning.Rotation$part.eta.sq = with(model.locomotion.learning.Rotation, `Sum Sq`/(`Sum Sq` + `Sum Sq.res`))
 
-model.locomotion.Rotation
+model.locomotion.learning.Rotation
 
-model.locomotion.Distance <- anova(art.locomotion.Distance)
-model.locomotion.Distance$part.eta.sq = with(model.locomotion.Distance, `Sum Sq`/(`Sum Sq` + `Sum Sq.res`))
+model.locomotion.learning.Distance <- anova(art.locomotion.learning.Distance)
+model.locomotion.learning.Distance$part.eta.sq = with(model.locomotion.learning.Distance, `Sum Sq`/(`Sum Sq` + `Sum Sq.res`))
 
-model.locomotion.Distance
+model.locomotion.learning.Distance
+
+model.locomotion.recall.Distance <- anova(art.locomotion.recall.Distance)
+model.locomotion.recall.Distance$part.eta.sq = with(model.locomotion.recall.Distance, `Sum Sq`/(`Sum Sq` + `Sum Sq.res`))
+
+model.locomotion.recall.Distance
 ```
+Rotation in learning phase p=0.02, no significant difference in distance in learning phase or recall phase.
+
 ### Post-hoc comparisons for main effects
 ```{r}
 marginal = art.con(art.locomotion.Rotation, "Condition")
@@ -1239,14 +1292,26 @@ marginal = art.con(art.locomotion.Rotation, "Condition")
 marginal
 ```
 
+### One-way repeated measures ANOVA
+```{r}
+model.recall.rotation <- aov(Rotation ~ Condition + Error(PID), data = data.locomotion.condition.recall.eliminated)
+
+summary(model.recall.rotation)
+```
+
+
 ## Locomotion Conclusions and Visualisation
 ```{r}
-d <- Rmisc::summarySE(data.locomotion.condition.eliminated, measurevar = "Rotation", groupvars = c("Condition"))
-d
+d <- Rmisc::summarySE(data.locomotion.condition.learning.eliminated, measurevar = "Rotation", groupvars = c("Condition"))
 ggplot(d, aes(x = Condition, y = Rotation, fill = Condition)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Rotation-ci, ymax=Rotation+ci)) + scale_fill_manual(values=c("#e41a1c", "#377eb8", "#984ea3", "#ff7f00"))
 
-d2 <- Rmisc::summarySE(data.locomotion.condition.eliminated, measurevar = "Distance", groupvars = c("Condition"))
-
+d2 <- Rmisc::summarySE(data.locomotion.condition.learning.eliminated, measurevar = "Distance", groupvars = c("Condition"))
 ggplot(d2, aes(x = Condition, y = Distance, fill = Condition)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Distance-ci, ymax=Distance+ci)) + scale_fill_manual(values=c("#e41a1c", "#377eb8", "#984ea3", "#ff7f00"))
+
+d3 <- Rmisc::summarySE(data.locomotion.condition.recall.eliminated, measurevar = "Rotation", groupvars = c("Condition"))
+ggplot(d3, aes(x = Condition, y = Rotation, fill = Condition)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Rotation-ci, ymax=Rotation+ci)) + scale_fill_manual(values=c("#e41a1c", "#377eb8", "#984ea3", "#ff7f00"))
+
+d4 <- Rmisc::summarySE(data.locomotion.condition.recall.eliminated, measurevar = "Distance", groupvars = c("Condition"))
+ggplot(d4, aes(x = Condition, y = Distance, fill = Condition)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Distance-ci, ymax=Distance+ci)) + scale_fill_manual(values=c("#e41a1c", "#377eb8", "#984ea3", "#ff7f00"))
 ```
 From the ANOVA test of Aligned Ranked data and a post-hoc comparisons for the main effect, we find a significant difference between the Condition "NoFurniture-Irregular" and "NoFurniture-Regular" on the head rotation data. It tells us that when participants in a room without any furniture, they perform more head rotations on Regular layout than Irregular layout.
