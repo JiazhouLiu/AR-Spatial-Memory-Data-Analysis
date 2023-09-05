@@ -1164,17 +1164,18 @@ With a Welch's t test, we found no significant effect for Furniture factor on He
 ### Visualisation
 ```{r}
 d <- Rmisc::summarySE(data.locomotion.furniture.learning.eliminated, measurevar = "Rotation", groupvars = c("Furniture"))
-ggplot(d, aes(x = Furniture, y = Rotation, fill = Furniture)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Rotation-ci, ymax=Rotation+ci)) + scale_fill_manual(values=c("#66c2a5", "#fc8d62"))
+ggplot(d, aes(x = Furniture, y = Rotation, fill = Furniture)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Rotation-ci, ymax=Rotation+ci)) + scale_fill_manual(values=c("#66c2a5", "#fc8d62")) + labs(y = "Rotation - Learning Phase", x = "")
 
 d2 <- Rmisc::summarySE(data.locomotion.furniture.learning.eliminated, measurevar = "Distance", groupvars = c("Furniture"))
-ggplot(d2, aes(x = Furniture, y = Distance, fill = Furniture)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Distance-ci, ymax=Distance+ci)) + scale_fill_manual(values=c("#66c2a5", "#fc8d62"))
+ggplot(d2, aes(x = Furniture, y = Distance, fill = Furniture)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Distance-ci, ymax=Distance+ci)) + scale_fill_manual(values=c("#66c2a5", "#fc8d62")) + labs(y = "Distance - Learning Phase", x = "")
 
 d3 <- Rmisc::summarySE(data.locomotion.furniture.recall.eliminated, measurevar = "Rotation", groupvars = c("Furniture"))
-ggplot(d, aes(x = Furniture, y = Rotation, fill = Furniture)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Rotation-ci, ymax=Rotation+ci)) + scale_fill_manual(values=c("#66c2a5", "#fc8d62"))
+ggplot(d, aes(x = Furniture, y = Rotation, fill = Furniture)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Rotation-ci, ymax=Rotation+ci)) + scale_fill_manual(values=c("#66c2a5", "#fc8d62")) + labs(y = "Rotation - Recall Phase", x = "")
 
 d4 <- Rmisc::summarySE(data.locomotion.furniture.recall.eliminated, measurevar = "Distance", groupvars = c("Furniture"))
-ggplot(d2, aes(x = Furniture, y = Distance, fill = Furniture)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Distance-ci, ymax=Distance+ci)) + scale_fill_manual(values=c("#66c2a5", "#fc8d62"))
+ggplot(d2, aes(x = Furniture, y = Distance, fill = Furniture)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Distance-ci, ymax=Distance+ci)) + scale_fill_manual(values=c("#66c2a5", "#fc8d62")) + labs(y = "Distance - Recall Phase", x = "")
 ```
+
 ## Layout Factor Analysis
 
 ### Check Outliers and remove them
@@ -1287,7 +1288,7 @@ Rotation in learning phase p=0.02, no significant difference in distance in lear
 
 ### Post-hoc comparisons for main effects
 ```{r}
-marginal = art.con(art.locomotion.Rotation, "Condition")
+marginal = art.con(art.locomotion.learning.Rotation, "Condition")
 
 marginal
 ```
@@ -1303,15 +1304,15 @@ summary(model.recall.rotation)
 ## Locomotion Conclusions and Visualisation
 ```{r}
 d <- Rmisc::summarySE(data.locomotion.condition.learning.eliminated, measurevar = "Rotation", groupvars = c("Condition"))
-ggplot(d, aes(x = Condition, y = Rotation, fill = Condition)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Rotation-ci, ymax=Rotation+ci)) + scale_fill_manual(values=c("#e41a1c", "#377eb8", "#984ea3", "#ff7f00"))
+ggplot(d, aes(x = Condition, y = Rotation, fill = Condition)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Rotation-ci, ymax=Rotation+ci)) + scale_fill_manual(values=c("#e41a1c", "#377eb8", "#984ea3", "#ff7f00")) + labs(y = "Rotation - Learning Phase", x = "")
 
 d2 <- Rmisc::summarySE(data.locomotion.condition.learning.eliminated, measurevar = "Distance", groupvars = c("Condition"))
-ggplot(d2, aes(x = Condition, y = Distance, fill = Condition)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Distance-ci, ymax=Distance+ci)) + scale_fill_manual(values=c("#e41a1c", "#377eb8", "#984ea3", "#ff7f00"))
+ggplot(d2, aes(x = Condition, y = Distance, fill = Condition)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Distance-ci, ymax=Distance+ci)) + scale_fill_manual(values=c("#e41a1c", "#377eb8", "#984ea3", "#ff7f00")) + labs(y = "Distance - Learning Phase", x = "")
 
 d3 <- Rmisc::summarySE(data.locomotion.condition.recall.eliminated, measurevar = "Rotation", groupvars = c("Condition"))
-ggplot(d3, aes(x = Condition, y = Rotation, fill = Condition)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Rotation-ci, ymax=Rotation+ci)) + scale_fill_manual(values=c("#e41a1c", "#377eb8", "#984ea3", "#ff7f00"))
+ggplot(d3, aes(x = Condition, y = Rotation, fill = Condition)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Rotation-ci, ymax=Rotation+ci)) + scale_fill_manual(values=c("#e41a1c", "#377eb8", "#984ea3", "#ff7f00")) + labs(y = "Rotation - Recall Phase", x = "")
 
 d4 <- Rmisc::summarySE(data.locomotion.condition.recall.eliminated, measurevar = "Distance", groupvars = c("Condition"))
-ggplot(d4, aes(x = Condition, y = Distance, fill = Condition)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Distance-ci, ymax=Distance+ci)) + scale_fill_manual(values=c("#e41a1c", "#377eb8", "#984ea3", "#ff7f00"))
+ggplot(d4, aes(x = Condition, y = Distance, fill = Condition)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Distance-ci, ymax=Distance+ci)) + scale_fill_manual(values=c("#e41a1c", "#377eb8", "#984ea3", "#ff7f00")) + labs(y = "Distance - Recall Phase", x = "")
 ```
 From the ANOVA test of Aligned Ranked data and a post-hoc comparisons for the main effect, we find a significant difference between the Condition "NoFurniture-Irregular" and "NoFurniture-Regular" on the head rotation data. It tells us that when participants in a room without any furniture, they perform more head rotations on Regular layout than Irregular layout.
