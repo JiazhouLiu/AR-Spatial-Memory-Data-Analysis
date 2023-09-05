@@ -104,3 +104,31 @@ ggplot(d, aes(x = Condition, y = Rotation, fill = Condition)) +
   scale_fill_manual(values=c("#e41a1c", "#377eb8", "#984ea3", "#ff7f00"))+ 
   labs(y = "Head Rotation", x = "") + 
   theme_minimal()
+
+######################################################
+library(ggplot2)
+d <- data.frame (
+  Name = c("A", "B", "C"),
+  Value = c(10, 3, 3)
+)
+ggplot(d, aes(fill=Name, y=Value)) + 
+  geom_bar(position="stack", stat="identity")
+
+library(tidyverse)
+
+Ancestry <- data.frame(Race = c("A", "B", "C"), 
+                       Proportion = c(10, 3, 3))
+
+Ancestry <- Ancestry %>% 
+  mutate(Year = "2006")
+
+ggplot(Ancestry, aes(x = Year, y = Proportion, fill = Race)) +
+  geom_col() +
+  scale_fill_manual(values=c("#8da0cb", "#e78ac3", "#ffff99"))+ 
+  theme_minimal(base_size = 16) +
+  ylab("Percentage") +
+  xlab(NULL)
+
+
+library(dplyr)
+data.subjective %>% group_by(PID) %>% summarise(mean_mental = mean(Mental))
