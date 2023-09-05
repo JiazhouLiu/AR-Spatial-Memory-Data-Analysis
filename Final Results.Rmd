@@ -4,6 +4,10 @@ title: 'Data Analysis: Investigating Effects of Environmental Landmarks on Spati
 author: 'Last update: Anonymous'
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
+  html_document:
+    toc: yes
+    toc_depth: '5'
+    df_print: paged
   html_notebook:
     toc: yes
     toc_float: yes
@@ -11,10 +15,6 @@ output:
     number_sections: yes
     theme: united
     highlight: tango
-  html_document:
-    toc: yes
-    toc_depth: '5'
-    df_print: paged
 ---
 
 # Accuracy Results
