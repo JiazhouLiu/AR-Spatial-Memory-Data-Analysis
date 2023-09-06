@@ -1,0 +1,15 @@
+12 x 3 configuration (virtual setup) - Done
+hand menu (virtual setup) - Done
+
+furniture room (top-down) (real setup)
+empty room (top-down) (real setup)
+Regular Layout (top-down) (virtual setup) - Done
+Irregular Layout (top-down) (virtual setup) - Done
+
+regular layout with furniture (one side) (real setup)
+irregular layout with furniture (one side) (real setup)
+
+
+furniture and cards - Learning(top-down) (real setup, 3rd person, avatar)
+distractor task (horizontal view) (virtual setup) - Done
+furniture and cards - Recall (top-down) (real setup, 3rd person, avatar)
